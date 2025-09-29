@@ -3,9 +3,11 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
+
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AppProvider } from "@/contexts/AppContext";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -41,8 +43,13 @@ export default function RootLayout() {
         <ThemeProvider
           value={colorScheme === "dark" ? customDarkTheme : customLightTheme}
         >
-          <RootStack />
-          <StatusBar style="auto" />
+          <SafeAreaView
+            style={{ flex: 1, backgroundColor: "#151718" }}
+            edges={["top", "bottom"]}
+          >
+            <RootStack />
+            <StatusBar style="auto" />
+          </SafeAreaView>
         </ThemeProvider>
       </AppProvider>
     </AuthProvider>
