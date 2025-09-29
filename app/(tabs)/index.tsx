@@ -1,75 +1,71 @@
+import GroupRankingBlock from "@/components/ui/GroupRankingBlock";
+import StatsBlock from "@/components/ui/StatsBlock";
 import { useAppData } from "@/contexts/AppContext";
 import React from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function HomeScreen() {
-  const colorScheme = useColorScheme();
-  const { profile, groups, sessions } = useAppData();
+// --- HELPERS ---
+function parseSessionDate(session: { start_time?: string }) {
+  return session.start_time ? new Date(session.start_time) : null;
+}
 
-  // Date courante
+function getStats(sessionsArr: any[]) {
+  let sessions = sessionsArr.length;
+  let amount = 0;
+  let time = 0;
+  sessionsArr.forEach(
+    (s: { amount_earned?: string | number; duration_minutes?: number }) => {
+      let earned = 0;
+      if (typeof s.amount_earned === "string") {
+        earned = parseFloat(s.amount_earned);
+      } else if (typeof s.amount_earned === "number") {
+        earned = s.amount_earned;
+      }
+      if (isNaN(earned)) earned = 0;
+      amount += earned;
+      time += s.duration_minutes ? s.duration_minutes / 60 : 0;
+    }
+  );
+  return {
+    sessions,
+    amount: Math.round(amount),
+    time: Math.round(time * 10) / 10,
+  };
+}
+
+export default function HomeScreen() {
+  const { profile, groups, sessions } = useAppData();
   const now = new Date();
 
-  // Helper pour parser la date session
-  function parseSessionDate(session: { start_time?: string }) {
-    return session.start_time ? new Date(session.start_time) : null;
-  }
-
-  // Filtrer sessions semaine (début lundi)
-  const day = now.getDay() === 0 ? 6 : now.getDay() - 1; // Lundi = 0
+  // Semaine (lundi 00:00 -> dimanche 23:59:59.999)
+  const day = now.getDay() === 0 ? 6 : now.getDay() - 1;
   const startOfWeekMonday = new Date(now);
   startOfWeekMonday.setDate(now.getDate() - day);
   startOfWeekMonday.setHours(0, 0, 0, 0);
-
+  const endOfWeekSunday = new Date(startOfWeekMonday);
+  endOfWeekSunday.setDate(startOfWeekMonday.getDate() + 6);
+  endOfWeekSunday.setHours(23, 59, 59, 999);
   const weekSessions = sessions.filter((s: { start_time?: string }) => {
     const d = parseSessionDate(s);
-    return d && d >= startOfWeekMonday && d <= now;
+    return d && d >= startOfWeekMonday && d <= endOfWeekSunday;
   });
-
-  // Filtrer sessions mois
+  // Mois
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthSessions = sessions.filter((s: { start_time?: string }) => {
     const d = parseSessionDate(s);
     return d && d >= startOfMonth && d <= now;
   });
-
-  // Calculer stats
-  function getStats(sessionsArr: any[]) {
-    let sessions = sessionsArr.length;
-    let amount = 0;
-    let time = 0;
-    sessionsArr.forEach(
-      (s: { amount_earned?: string | number; duration_minutes?: number }) => {
-        // Correction : amount_earned peut être string (ex: "2.50")
-        let earned = 0;
-        if (typeof s.amount_earned === "string") {
-          earned = parseFloat(s.amount_earned);
-        } else if (typeof s.amount_earned === "number") {
-          earned = s.amount_earned;
-        }
-        if (isNaN(earned)) earned = 0;
-        amount += earned;
-        time += s.duration_minutes ? s.duration_minutes / 60 : 0;
-      }
-    );
-    return {
-      sessions,
-      amount: Math.round(amount),
-      time: Math.round(time * 10) / 10, // 1 décimale
-    };
-  }
-
   const weeklyStats = getStats(weekSessions);
   const monthlyStats = getStats(monthSessions);
-  // --- LOGIQUE CALENDRIER 7 JOURS ---
-  // À placer juste avant le return, après toutes les déclarations nécessaires
-  const [selectedDay, setSelectedDay] = React.useState(6); // 6 = aujourd'hui (dernier à droite)
+
+  // Calendrier 7 jours
+  const [selectedDay, setSelectedDayRaw] = React.useState(6);
+  const setSelectedDay = (idx: number) => {
+    if (idx < 0) setSelectedDayRaw(0);
+    else if (idx > 6) setSelectedDayRaw(6);
+    else setSelectedDayRaw(idx);
+  };
   const daysOfWeek = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(now);
@@ -88,18 +84,37 @@ export default function HomeScreen() {
   });
   const dayStats = getStats(daySessions);
 
-  // Fonction de déconnexion supprimée
+  // Format dynamique du titre du jour
+  const getDayTitle = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selected = new Date(selectedDate);
+    selected.setHours(0, 0, 0, 0);
+    if (selected.getTime() === today.getTime()) {
+      return "Aujourd'hui";
+    } else {
+      const mois = [
+        "janvier",
+        "février",
+        "mars",
+        "avril",
+        "mai",
+        "juin",
+        "juillet",
+        "août",
+        "septembre",
+        "octobre",
+        "novembre",
+        "décembre",
+      ];
+      return `${selected.getDate()} ${
+        mois[selected.getMonth()]
+      } ${selected.getFullYear()}`;
+    }
+  };
 
   return (
-    <SafeAreaView
-      style={[
-        styles.safeArea,
-        colorScheme === "dark"
-          ? { backgroundColor: "#151718" }
-          : { backgroundColor: "#f5f5f5" },
-      ]}
-      edges={["top"]}
-    >
+    <SafeAreaView style={[styles.safeArea]} edges={["top"]}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={{ paddingBottom: 32 }}
@@ -112,9 +127,8 @@ export default function HomeScreen() {
           </Text>
           <Text style={styles.appTitle}>POOPAY</Text>
           <Text style={styles.subtitle}>
-            L&apos;app la plus fun pour traquerjkj tes cacas ! 🚽
+            L&apos;app la plus fun pour traquer tes cacas ! 🚽
           </Text>
-          {/* Bouton de déconnexion supprimé */}
         </View>
 
         {/* Calendrier 7 jours */}
@@ -126,86 +140,64 @@ export default function HomeScreen() {
                 <Text style={styles.calendarDayLabel}>
                   {daysOfWeek[date.getDay() === 0 ? 6 : date.getDay() - 1]}
                 </Text>
-                <Text
-                  style={[
+                <Pressable
+                  style={({ pressed }) => [
                     styles.calendarDayButton,
-                    isActive && styles.calendarDayButtonActive,
+                    isActive
+                      ? styles.calendarDayButtonActive
+                      : styles.calendarDayButtonInactive,
+                    pressed && { opacity: 0.7 },
                   ]}
                   onPress={() => setSelectedDay(idx)}
                 >
-                  {date.getDate()}
-                </Text>
+                  <Text
+                    style={[
+                      styles.calendarDayText,
+                      isActive
+                        ? styles.calendarDayTextActive
+                        : styles.calendarDayTextInactive,
+                    ]}
+                  >
+                    {date.getDate()}
+                  </Text>
+                </Pressable>
               </View>
             );
           })}
         </View>
 
+        {/* Titre stats jour dynamique */}
+        <Text style={styles.statsBlockTitle}>{getDayTitle()}</Text>
         {/* Stats du jour sélectionné */}
-        <View style={styles.statsBlock}>
-          <View style={styles.statsItem}>
-            <Text style={styles.statsValue}>{dayStats.sessions}</Text>
-            <Text style={styles.statsLabel}>Sessions (jour)</Text>
-          </View>
-          <View style={styles.statsItem}>
-            <Text style={styles.statsValue}>{dayStats.amount}€</Text>
-            <Text style={styles.statsLabel}>Gagné (jour)</Text>
-          </View>
-          <View style={styles.statsItem}>
-            <Text style={styles.statsValue}>{dayStats.time}h</Text>
-            <Text style={styles.statsLabel}>Temps passé (jour)</Text>
-          </View>
-          {/* SUPPRESSION de la balise </View> superflue ici */}
-        </View>
 
-        {/* Bloc semaine */}
-        <View style={styles.statsBlock}>
-          <View style={styles.statsItem}>
-            <Text style={styles.statsValue}>{weeklyStats.sessions}</Text>
-            <Text style={styles.statsLabel}>Sessions</Text>
-          </View>
-          <View style={styles.statsItem}>
-            <Text style={styles.statsValue}>{weeklyStats.amount}€</Text>
-            <Text style={styles.statsLabel}>Gagné</Text>
-          </View>
-          <View style={styles.statsItem}>
-            <Text style={styles.statsValue}>{weeklyStats.time}h</Text>
-            <Text style={styles.statsLabel}>Temps passé</Text>
-          </View>
-        </View>
+        <StatsBlock stats={dayStats} />
 
-        {/* Bloc mois */}
-        <View style={styles.statsBlock}>
-          <View style={styles.statsItem}>
-            <Text style={styles.statsValue}>{monthlyStats.sessions}</Text>
-            <Text style={styles.statsLabel}>Sessions (mois)</Text>
-          </View>
-          <View style={styles.statsItem}>
-            <Text style={styles.statsValue}>{monthlyStats.amount}€</Text>
-            <Text style={styles.statsLabel}>Gagné (mois)</Text>
-          </View>
-          <View style={styles.statsItem}>
-            <Text style={styles.statsValue}>{monthlyStats.time}h</Text>
-            <Text style={styles.statsLabel}>Temps passé (mois)</Text>
-          </View>
-        </View>
+        {/* Titre stats semaine */}
+
+        {/* Semaine */}
+        <Text style={styles.statsBlockTitle}>Cette semaine</Text>
+        <StatsBlock stats={weeklyStats} />
+
+        {/* Mois */}
+        <Text style={styles.statsBlockTitle}>Ce mois-ci</Text>
+        <StatsBlock
+          stats={monthlyStats}
+          labels={["Sessions (mois)", "Gagné (mois)", "Temps passé (mois)"]}
+        />
 
         {/* Séparation et titre groupes */}
         <View style={styles.groupTitleSection}>
           <View style={styles.separator} />
-          <Text style={styles.groupTitle}>Vos Groupes</Text>
+          <Text style={styles.groupTitle}>Classement de la semaine </Text>
         </View>
 
-        {/* Liste des groupes */}
+        {/* Liste des groupes harmonisée */}
         {groups.map((group, idx) => (
-          <View key={group.name + idx} style={styles.groupBlock}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.groupName}>{group.name}</Text>
-            </View>
-            <View style={{ alignItems: "flex-end" }}>
-              <Text style={styles.groupPlace}>#{group.userPlace}</Text>
-              <Text style={styles.groupLeader}>Leader : {group.leader}</Text>
-            </View>
-          </View>
+          <GroupRankingBlock
+            key={group.name + idx}
+            group={group}
+            profile={profile}
+          />
         ))}
       </ScrollView>
     </SafeAreaView>
@@ -217,9 +209,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 18,
+    marginBottom: 15,
     marginTop: 18,
-    paddingHorizontal: 8,
   },
   calendarDayLabel: {
     fontSize: 12,
@@ -228,21 +219,22 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   calendarDayButton: {
-    fontSize: 18,
-    color: "#8B4513",
-    backgroundColor: "rgba(139,69,19,0.08)",
     borderRadius: 16,
     paddingVertical: 6,
-    paddingHorizontal: 0,
     width: 32,
-    textAlign: "center",
+    height: 32,
     marginBottom: 2,
-    overflow: "hidden",
+
+    justifyContent: "center",
+    alignItems: "center",
+    display: "flex",
+    zIndex: 10,
+  },
+  calendarDayButtonInactive: {
+    backgroundColor: "rgba(139,69,19,0.08)",
   },
   calendarDayButtonActive: {
     backgroundColor: "#8B4513",
-    color: "white",
-    fontWeight: "bold",
     borderWidth: 1,
     borderColor: "#8B4513",
     shadowColor: "#8B4513",
@@ -250,6 +242,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+  },
+  calendarDayText: {
+    fontSize: 18,
+    textAlign: "center",
+    backgroundColor: "transparent",
+  },
+  calendarDayTextActive: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  calendarDayTextInactive: {
+    color: "#8B4513",
+    fontWeight: "normal",
+  },
+  statsBlockTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#8B4513",
+    marginLeft: 4,
+    marginBottom: 8, // Ajoute un espace sous le titre
   },
   safeArea: {
     flex: 1,
@@ -259,15 +271,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "transparent",
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 10,
   },
   headerSection: {
     alignItems: "center",
-    marginBottom: 30,
-    paddingTop: 0,
+    marginBottom: 10,
   },
   welcomeText: {
-    fontSize: 13,
+    fontSize: 18,
     opacity: 0.8,
     marginBottom: 2,
     textAlign: "center",
@@ -287,27 +298,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "#ECEDEE",
   },
-  logoutButton: {
-    backgroundColor: "#8B4513",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginTop: 10,
-    alignItems: "center",
-    shadowColor: "#8B4513",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  logoutButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   statsBlock: {
-    marginVertical: 18,
-    padding: 24,
     backgroundColor: "rgba(139, 69, 19, 0.05)",
     borderRadius: 16,
     width: "100%",
@@ -316,6 +307,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(139, 69, 19, 0.1)",
+    padding: 8, // padding réduit
+  },
+  statsBlockSpacing: {
+    marginBottom: 10,
   },
   statsItem: {
     alignItems: "center",
@@ -350,21 +345,34 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   groupBlock: {
+    display: "none", // On n'utilise plus ce style, harmonisation faite avec statsBlock
+  },
+  groupBlockHarmonized: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "rgba(139, 69, 19, 0.05)",
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 16,
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "rgba(139, 69, 19, 0.1)",
+    // même fond, bordure, padding que statsBlock
   },
   groupName: {
     fontWeight: "bold",
     fontSize: 16,
     color: "#8B4513",
+    marginLeft: 4,
+  },
+  groupMedal: {
+    fontSize: 18,
+    marginRight: 4,
+  },
+  groupMedalLabel: {
+    fontSize: 14,
+    color: "#8B4513",
+    fontWeight: "bold",
+    marginRight: 8,
+  },
+  groupLeaderName: {
+    fontSize: 14,
+    color: "#8B4513",
+    fontWeight: "normal",
   },
   groupPlace: {
     color: "#8B4513",

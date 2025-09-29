@@ -7,7 +7,7 @@ interface GroupMeta {
   memberCount: number;
   userPlace: number;
   leader: string;
-
+  members: GroupMember[];
   // autres métadonnées utiles
 }
 
@@ -96,3 +96,8 @@ export function useAppData() {
     throw new Error("useAppData doit être utilisé dans AppProvider");
   return context;
 }
+
+export type GroupMember = {
+  username: string;
+  // Ajoute ici d'autres propriétés si besoin (score, avatar, etc)
+};

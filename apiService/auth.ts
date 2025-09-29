@@ -1,5 +1,5 @@
 // Détecter l'environnement pour utiliser la bonne URL
-const API_BASE_URL = 'http://192.168.1.10:3333';  // Pour l'émulateur Android
+const API_BASE_URL = 'http://192.168.1.14:3333';  // Pour l'émulateur Android
 // Récupérer toutes les données d'initialisation (profil, abonnement, sessions, groupes, settings...)
 export const getInitData = async (token: string, userId: string) => {
     const response = await fetch(`${API_BASE_URL}/users/${userId}/init`, {
