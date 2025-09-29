@@ -139,6 +139,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "transparent",
   },
+  scrollContent: {
+    paddingBottom: 30,
+  },
 
   header: {
     paddingHorizontal: 20,
