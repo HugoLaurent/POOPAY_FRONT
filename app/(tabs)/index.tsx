@@ -3,7 +3,8 @@ import StatsBlock from "@/components/ui/StatsBlock";
 import { useAppData } from "@/contexts/AppContext";
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useThemeColor } from "@/hooks/use-theme-color";
+import { ThemedView } from "@/components/themed-view";
 
 // --- HELPERS ---
 function parseSessionDate(session: { start_time?: string }) {
@@ -36,6 +37,8 @@ function getStats(sessionsArr: any[]) {
 
 export default function HomeScreen() {
   const { profile, groups, sessions } = useAppData();
+  const themedTextColor = useThemeColor({}, "text");
+  const themedSubtitleColor = useThemeColor({}, "text");
   const now = new Date();
 
   // Semaine (lundi 00:00 -> dimanche 23:59:59.999)
@@ -114,7 +117,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea]} edges={["top"]}>
+    <ThemedView style={styles.safeArea}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={{ paddingBottom: 32 }}
@@ -122,11 +125,11 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={styles.headerSection}>
-          <Text style={styles.welcomeText}>
+          <Text style={[styles.welcomeText, { color: themedTextColor }]}>
             Bienvenue {profile?.username || "utilisateur"} sur
           </Text>
           <Text style={styles.appTitle}>POOPAY</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, { color: themedSubtitleColor }]}>
             L&apos;app la plus fun pour traquer tes cacas ! 🚽
           </Text>
         </View>
@@ -153,6 +156,13 @@ export default function HomeScreen() {
                   <Text
                     style={[
                       styles.calendarDayText,
+                      {
+                        textAlign: "center",
+                        textAlignVertical: "center",
+                        width: 32,
+                        height: 32,
+                        lineHeight: 32,
+                      },
                       isActive
                         ? styles.calendarDayTextActive
                         : styles.calendarDayTextInactive,
@@ -182,7 +192,7 @@ export default function HomeScreen() {
         <Text style={styles.statsBlockTitle}>Ce mois-ci</Text>
         <StatsBlock
           stats={monthlyStats}
-          labels={["Sessions (mois)", "Gagné (mois)", "Temps passé (mois)"]}
+          labels={["Sessions", "Gagné", "Temps passé"]}
         />
 
         {/* Séparation et titre groupes */}
@@ -200,7 +210,7 @@ export default function HomeScreen() {
           />
         ))}
       </ScrollView>
-    </SafeAreaView>
+    </ThemedView>
   );
 }
 
@@ -265,7 +275,6 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: "#151718",
   },
   container: {
     flex: 1,
@@ -279,10 +288,9 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 18,
-    opacity: 0.8,
     marginBottom: 2,
     textAlign: "center",
-    color: "#8B4513",
+    // couleur gérée dynamiquement par useThemeColor
   },
   appTitle: {
     fontSize: 32,

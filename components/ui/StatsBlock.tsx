@@ -1,5 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { ThemedView } from "@/components/themed-view";
+import { useThemeColor } from "@/hooks/use-theme-color";
 
 interface StatsBlockProps {
   stats: { sessions: number; amount: number; time: number };
@@ -12,8 +14,19 @@ export default function StatsBlock({
   labels = ["Sessions", "Gagné", "Temps passé"],
   style,
 }: StatsBlockProps) {
+  const blockBg = useThemeColor(
+    { light: "#F7F5F2", dark: undefined },
+    "background"
+  );
   return (
-    <View style={[styles.statsBlock, styles.statsBlockSpacing, style]}>
+    <ThemedView
+      style={[
+        styles.statsBlock,
+        styles.statsBlockSpacing,
+        { backgroundColor: blockBg },
+        style,
+      ]}
+    >
       <View style={[styles.statsItem, styles.statsItemSpacing]}>
         <Text style={styles.statsValue}>{stats.sessions}</Text>
         <Text style={styles.statsLabel}>{labels[0]}</Text>
@@ -26,13 +39,12 @@ export default function StatsBlock({
         <Text style={styles.statsValue}>{stats.time}h</Text>
         <Text style={styles.statsLabel}>{labels[2]}</Text>
       </View>
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   statsBlock: {
-    backgroundColor: "rgba(139, 69, 19, 0.05)",
     borderRadius: 16,
     width: "100%",
     flexDirection: "row",

@@ -1,6 +1,8 @@
 import { GroupMember } from "@/contexts/AppContext";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { ThemedView } from "@/components/themed-view";
+import { useThemeColor } from "@/hooks/use-theme-color";
 
 interface GroupRankingBlockProps {
   group: any;
@@ -16,12 +18,16 @@ export default function GroupRankingBlock({
   const members = group.members || [];
   const topMembers = members.slice(0, 3);
   const medals = ["🥇", "🥈", "🥉"];
+  const blockBg = useThemeColor(
+    { light: "#F7F5F2", dark: undefined },
+    "background"
+  );
   return (
-    <View
+    <ThemedView
       style={[
         styles.statsBlock,
         styles.statsBlockSpacing,
-        styles.groupBlockHarmonized,
+        { backgroundColor: blockBg },
         style,
       ]}
     >
@@ -55,13 +61,12 @@ export default function GroupRankingBlock({
           );
         })}
       </View>
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   statsBlock: {
-    backgroundColor: "rgba(139, 69, 19, 0.05)",
     borderRadius: 16,
     width: "100%",
     flexDirection: "row",

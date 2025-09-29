@@ -1,5 +1,4 @@
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppData } from "@/contexts/AppContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,6 +14,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useThemeColor } from "@/hooks/use-theme-color";
+import { ThemedView } from "@/components/themed-view";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -76,8 +77,17 @@ export default function LoginScreen() {
     }
   };
 
+  const backgroundColor = useThemeColor({}, "background");
+  const inputBg = useThemeColor(
+    { light: "rgba(139, 69, 19, 0.08)", dark: "rgba(139, 69, 19, 0.15)" },
+    "background"
+  );
+  const inputBorder = useThemeColor(
+    { light: "rgba(139, 69, 19, 0.2)", dark: "rgba(139, 69, 19, 0.3)" },
+    "background"
+  );
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+    <ThemedView style={[styles.safeArea, { backgroundColor }]}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -102,11 +112,20 @@ export default function LoginScreen() {
             <ThemedView style={styles.inputContainer}>
               <ThemedText style={styles.label}>Email</ThemedText>
               <TextInput
-                style={styles.input}
-                value={email }
+                style={[
+                  styles.input,
+                  { backgroundColor: inputBg, borderColor: inputBorder },
+                ]}
+                value={email}
                 onChangeText={setEmail}
                 placeholder="ton.email@example.com"
-                placeholderTextColor="rgba(139, 69, 19, 0.5)"
+                placeholderTextColor={useThemeColor(
+                  {
+                    light: "rgba(139, 69, 19, 0.5)",
+                    dark: "rgba(236, 237, 238, 0.5)",
+                  },
+                  "text"
+                )}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -116,11 +135,20 @@ export default function LoginScreen() {
             <ThemedView style={styles.inputContainer}>
               <ThemedText style={styles.label}>Mot de passe</ThemedText>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  { backgroundColor: inputBg, borderColor: inputBorder },
+                ]}
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Au moins 6 caractères..."
-                placeholderTextColor="rgba(139, 69, 19, 0.5)"
+                placeholderTextColor={useThemeColor(
+                  {
+                    light: "rgba(139, 69, 19, 0.5)",
+                    dark: "rgba(236, 237, 238, 0.5)",
+                  },
+                  "text"
+                )}
                 secureTextEntry
                 autoCapitalize="none"
               />
@@ -161,14 +189,13 @@ export default function LoginScreen() {
           </ThemedView>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#151718",
   },
   container: {
     flex: 1,
@@ -213,9 +240,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   input: {
-    backgroundColor: "rgba(139, 69, 19, 0.1)",
     borderWidth: 1,
-    borderColor: "rgba(139, 69, 19, 0.3)",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,

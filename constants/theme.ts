@@ -10,12 +10,13 @@ const tintColorDark = '#fff';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    text: '#4B3F2A', // brun doux
+    background: '#E0DAD2', // beige moyen (plus foncé)
+    tint: '#FF914D', // orange doux/terracotta
+    icon: '#A89B8C', // taupe/gris chaud
+    tabIconDefault: '#A89B8C',
+    tabIconSelected: '#FF914D',
+    border: '#E0DAD2', // beige grisé
   },
   dark: {
     text: '#ECEDEE',
@@ -24,6 +25,7 @@ export const Colors = {
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
+    border: '#232526', // ajout pour la navbar dark
   },
 };
 
