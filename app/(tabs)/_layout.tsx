@@ -46,6 +46,16 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="group"
+        options={{
+          title: "Groupe",
+          tabBarLabel: "Groupe",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="person.2.fill" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

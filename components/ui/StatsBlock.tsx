@@ -51,7 +51,7 @@ const getStyles = (colors: any) =>
       backgroundColor: colors.groupCardBg,
     },
     statsBlockSpacing: {
-      marginBottom: 18,
+      marginBottom: 4,
     },
     statsItem: {
       alignItems: "center",

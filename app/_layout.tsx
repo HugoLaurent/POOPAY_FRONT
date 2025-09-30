@@ -91,11 +91,15 @@ function RootStack() {
         }}
       />
       <Stack.Screen
-        name="group-details"
+        name="group/details"
         options={{
-          headerShown: false,
+          // Affiche l'en-tête natif pour permettre le retour en arrière
+          headerShown: true,
+          // On garde la même animation
           animation: "slide_from_right",
+
         }}
+        
       />
       <Stack.Screen
         name="modal"

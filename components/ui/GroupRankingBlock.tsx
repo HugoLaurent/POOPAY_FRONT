@@ -68,11 +68,15 @@ const getStyles = (colors: any) =>
       alignItems: "center",
       borderWidth: 1,
       borderColor: "rgba(139, 69, 19, 0.1)",
-      padding: 8,
+      padding: 6,
       backgroundColor: colors.groupCardBg,
     },
     statsBlockSpacing: {
-      marginBottom: 10,
+      marginBottom: 6,
+    },
+    leftColumn: {
+      flex: 1,
+      justifyContent: "center",
     },
     rightColumn: {
       alignItems: "flex-end",
@@ -96,7 +100,6 @@ const getStyles = (colors: any) =>
       color: colors.textDivers,
       marginLeft: 4,
     },
-    leftColumn: { flex: 1 },
     groupMedal: {
       fontSize: 18,
       marginRight: 4,

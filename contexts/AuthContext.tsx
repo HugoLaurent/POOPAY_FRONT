@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, ReactNode, useContext, useState } from "react";
+import { router } from "expo-router";
 import * as authAPI from "../apiService/auth";
 
 interface User {
@@ -33,6 +34,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
   React.useEffect(() => {
     checkAuthStatus();
   }, []);
+
+  // Si la vérification est terminée (isLoading false) et qu'il n'y a pas d'user,
+  // s'assurer que l'utilisateur est redirigé vers l'écran de login et que le
+  // storage est nettoyé.
+  React.useEffect(() => {
+    if (!isLoading && !user) {
+      // Nettoyage supplémentaire et redirection
+      (async () => {
+        try {
+          await AsyncStorage.multiRemove(["access_token", "user_data"]);
+        } catch {
+          // noop
+        }
+        // Utilise replace pour empêcher le retour en arrière vers des écrans protégés
+        try {
+          router.replace("/login");
+        } catch {
+          // router peut ne pas être prêt dans certains environnements — ignore
+        }
+      })();
+    }
+  }, [isLoading, user]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {

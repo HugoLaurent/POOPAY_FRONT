@@ -190,7 +190,6 @@ export default function HomeScreen() {
 
         {/* Séparation et titre groupes */}
         <View style={styles.groupTitleSection}>
-          <View style={styles.separator} />
           <ThemedText style={styles.groupTitle}>
             Classement de la semaine{" "}
           </ThemedText>
@@ -214,6 +213,7 @@ const getStyles = (colors: any) =>
     // Safe area
     safeArea: {
       flex: 1,
+      paddingTop: 10,
     },
 
     // Container
@@ -227,7 +227,6 @@ const getStyles = (colors: any) =>
     // Header
     headerSection: {
       alignItems: "center",
-      marginBottom: 10,
     },
     welcomeText: {
       fontSize: 18,
@@ -245,13 +244,12 @@ const getStyles = (colors: any) =>
     appTitle: {
       fontSize: 32,
       fontWeight: "bold",
-      marginBottom: 8,
       textAlign: "center",
       color: colors.title,
     },
     subtitle: {
-      fontSize: 14,
-      opacity: 0.7,
+      fontSize: 13,
+      opacity: 0.85,
       textAlign: "center",
       color: colors.subtitle,
     },
@@ -261,8 +259,8 @@ const getStyles = (colors: any) =>
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 15,
-      marginTop: 18,
+      marginBottom: 10,
+      marginTop: 20,
     },
     calendarDayLabel: {
       fontSize: 12,
@@ -271,11 +269,11 @@ const getStyles = (colors: any) =>
       marginBottom: 2,
     },
     calendarDayButton: {
-      borderRadius: 16,
-      paddingVertical: 6,
-      width: 32,
-      height: 32,
-      marginBottom: 2,
+      borderRadius: 14,
+      paddingVertical: 4,
+      width: 30,
+      height: 30,
+      marginBottom: 10,
       justifyContent: "center",
       alignItems: "center",
       display: "flex",
@@ -319,24 +317,22 @@ const getStyles = (colors: any) =>
       fontWeight: "bold",
       color: colors.title,
       marginLeft: 4,
-      marginBottom: 8, // Ajoute un espace sous le titre
+      marginBottom: 4,
     },
 
     // Bloc de statistiques
     statsBlock: {
       backgroundColor: "rgba(139, 69, 19, 0.05)",
-      borderRadius: 16,
+      borderRadius: 12,
       width: "100%",
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
       borderWidth: 1,
       borderColor: "rgba(139, 69, 19, 0.1)",
-      padding: 8, // padding réduit
+      padding: 6, // padding réduit
     },
-    statsBlockSpacing: {
-      marginBottom: 10,
-    },
+   
     statsItem: {
       alignItems: "center",
       flex: 1,
@@ -355,21 +351,16 @@ const getStyles = (colors: any) =>
     // Section des groupes
     groupTitleSection: {
       width: "100%",
-      marginVertical: 24,
+      marginVertical: 14,
+      marginBottom: 7,
       alignItems: "flex-start",
     },
-    separator: {
-      height: 1,
-      backgroundColor: colors.primary,
-      width: "100%",
-      marginBottom: 8,
-      opacity: 0.2,
-    },
+  
     groupTitle: {
       fontWeight: "bold",
-      fontSize: 18,
+      fontSize: 17,
       color: colors.primary,
-      marginBottom: 8,
+      marginBottom: 2,
     },
     groupBlock: {
       display: "none",
@@ -400,8 +391,8 @@ const getStyles = (colors: any) =>
       color: colors.primary,
       fontWeight: "normal",
     },
-    contentContainer: { paddingBottom: 32 },
-    dayCell: { flex: 1, alignItems: "center" },
+    contentContainer: { paddingBottom: 16 },
+    dayCell: { flex: 1, alignItems: "center", paddingVertical: 2 },
     groupPlace: {
       color: colors.primary,
       fontWeight: "bold",

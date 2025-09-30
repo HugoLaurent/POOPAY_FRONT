@@ -13,7 +13,6 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { ThemedView } from "@/components/themed-view";

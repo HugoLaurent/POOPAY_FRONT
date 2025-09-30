@@ -9,7 +9,8 @@ import {
 import type { GroupData } from "@/types/group";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
-import { useLocalSearchParams } from "expo-router";
+import GroupDetailsHeader from "@/components/GroupDetailsHeader";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
@@ -21,6 +22,7 @@ const getMedal = (idx: number) => {
 
 export default function GroupDetailsScreen() {
   const params = useLocalSearchParams();
+  const navigation = useNavigation();
   const groupParam = params.group;
   const isAdminParam = params.isAdmin;
   const [group, setGroup] = useState<GroupData | null>(null);
@@ -35,6 +37,27 @@ export default function GroupDetailsScreen() {
       try {
         const parsed = JSON.parse(groupParam as string);
         setGroup(parsed);
+        // Met à jour le titre de l'écran dans l'en-tête natif
+        try {
+          // Définit un header personnalisé qui permet un style complet
+          navigation.setOptions &&
+            navigation.setOptions({
+              header: () => (
+                <GroupDetailsHeader
+                  title={parsed.name}
+                  subtitle={`Members: ${parsed.members?.length ?? 0}`}
+                  onBack={() => navigation.goBack && navigation.goBack()}
+                  onEdit={() => {
+                    // Placeholder: déclenche l'édition locale
+                    setIsAdmin(isAdminParam === "1");
+                    Alert.alert("Modifier le nom", "Fonction à implémenter");
+                  }}
+                />
+              ),
+            });
+        } catch {
+          // Certains environnements (ex: preview) peuvent ne pas exposer setOptions
+        }
         setIsAdmin(isAdminParam === "1");
       } catch {
         setGroup(null);
@@ -42,7 +65,7 @@ export default function GroupDetailsScreen() {
     } else {
       setGroup(null);
     }
-  }, [groupParam, isAdminParam]);
+  }, [groupParam, isAdminParam, navigation]);
 
   const handleAddMember = () => {
     Alert.alert("Ajouter un membre", "Fonction à implémenter");
