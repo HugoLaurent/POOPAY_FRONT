@@ -175,7 +175,7 @@ const getStyles = (colors: any) =>
       fontSize: 20,
       marginRight: 8,
       width: 30,
-      textAlign: 'center',
+      textAlign: "center",
     },
     participantName: {
       flex: 1,

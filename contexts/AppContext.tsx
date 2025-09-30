@@ -41,14 +41,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Un seul appel pour tout récupérer
       // getInitData doit retourner { profile, subscription, settings, sessions, groups }
       const profileRes = await authAPI.getProfile(token);
-      const user = profileRes.user || profileRes;
-      const userId = user.id;
+      // Normaliser la réponse qui peut être { data: {...} } ou { user: {...} } ou directement l'objet user
+      const profileResData =
+        (profileRes && (profileRes as any).data) || profileRes;
+      const user =
+        (profileResData && (profileResData as any).user) || profileResData;
+      const userId = user?.id;
+
       const initRes = await authAPI.getInitData(token, userId);
-      setProfile(initRes.profile || null);
-      setSubscription(initRes.subscription || null);
-      setSettings(initRes.settings || null);
-      setSessions(initRes.sessions || []);
-      setGroups(initRes.groups || []);
+      // Normaliser initRes qui peut contenir un wrapper 'data'
+      const initResData = (initRes && (initRes as any).data) || initRes || {};
+
+      // Preferer initResData.profile, sinon initResData.user, sinon initResData (cas où init renvoie directement le profil)
+      const resolvedProfile =
+        initResData.profile || initResData.user || initResData;
+      setProfile(resolvedProfile || null);
+      setSubscription(initResData.subscription || null);
+      setSettings(initResData.settings || null);
+      setSessions(initResData.sessions || []);
+      setGroups(initResData.groups || []);
+      // Debug logs utiles en dev
+      console.log("[AppProvider] initializeAppData profileRes:", profileRes);
+      console.log("[AppProvider] initializeAppData initRes:", initRes);
     } catch (e) {
       console.error("Erreur chargement données app:", e);
     } finally {

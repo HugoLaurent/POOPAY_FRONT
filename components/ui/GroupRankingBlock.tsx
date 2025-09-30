@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { ThemedView } from "@/components/themed-view";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import type { GroupData, Member } from "@/types/group";
+import type { GroupData } from "@/types/group";
 
 interface GroupRankingBlockProps {
   group: GroupData;
@@ -23,8 +23,7 @@ export default function GroupRankingBlock({
   const colors = Colors[theme];
   const styles = getStyles(colors);
   // DEBUG LOG
-  console.log("[GroupRankingBlock] group.members:", members);
-  console.log("[GroupRankingBlock] profile:", profile);
+
   return (
     <ThemedView style={[styles.statsBlock, styles.statsBlockSpacing, style]}>
       <View style={{ flex: 1 }}>
@@ -94,7 +93,7 @@ const getStyles = (colors: any) =>
     groupName: {
       fontWeight: "bold",
       fontSize: 16,
-      color: colors.groupCardTitle,
+      color: colors.textDivers,
       marginLeft: 4,
     },
     groupMedal: {
@@ -103,7 +102,7 @@ const getStyles = (colors: any) =>
     },
     groupLeaderName: {
       fontSize: 14,
-      color: colors.groupCardTitle,
+      color: colors.textDivers,
       fontWeight: "normal",
     },
   });

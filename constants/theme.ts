@@ -12,9 +12,10 @@ export const Colors = {
 
 
     // Text
-    title: '#C7a16e',
+    title: '#8B4513',
     subtitle: '#3a342dff',
     smallTitle: '#C7a16e',
+    textDivers: '#C7A16E',
     // Button
     bgButtonPrimary: '#C7A16E',
     textButtonPrimary: '#fff',
@@ -54,9 +55,10 @@ export const Colors = {
   },
   dark: {
     // Text
-    title: '#C7a16e',
+    title: '#8B4513',
     subtitle: '#E0DAD2',
     smallTitle: '#C7a16e',
+    textDivers: '#C7A16E',
     textInfo: '#E0DAD2',
     textSwitchLogin: '#8B4513',
     // Button

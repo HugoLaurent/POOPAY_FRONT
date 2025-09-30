@@ -63,11 +63,11 @@ const getStyles = (colors: any) =>
     statsValue: {
       fontSize: 22,
       fontWeight: "bold",
-      color: colors.groupCardTitle,
+      color: colors.textDivers,
       marginBottom: 4,
     },
     statsLabel: {
-      color: colors.groupCardTitle,
+      color: colors.textDivers,
       fontSize: 13,
       opacity: 0.7,
       letterSpacing: 0.2,
