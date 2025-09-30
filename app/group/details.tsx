@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Alert,
   ScrollView,
 } from "react-native";
 import type { GroupData } from "@/types/group";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ThemedView } from "@/components/themed-view";
+import { ThemedText } from "@/components/themed-text";
 import { useLocalSearchParams } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
-// Helpers
-
+// Helper: conserve le nom et le comportement
 const getMedal = (idx: number) => {
   const medalIcons = ["🥇", "🥈", "🥉"];
   return medalIcons[idx] ?? String(idx + 1);
@@ -28,8 +27,8 @@ export default function GroupDetailsScreen() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   const theme = useColorScheme() ?? "light";
-  const styles = getStyles(theme);
   const colors = Colors[theme];
+  const styles = getStyles(colors);
 
   useEffect(() => {
     if (groupParam) {
@@ -54,354 +53,161 @@ export default function GroupDetailsScreen() {
 
   if (!group) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <Text style={styles.emptyTitle}>Groupe introuvable</Text>
-      </SafeAreaView>
+      <ThemedView style={styles.container}>
+        <ThemedText style={styles.emptyTitle}>Groupe introuvable</ThemedText>
+      </ThemedView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.card}>
-          <View style={styles.headerRowCustom}>
-            <View style={styles.headerMain}>
-              <Text style={styles.groupName}>{group.name}</Text>
-              <Text style={styles.groupSubtitle}>
-                <Text style={styles.infoValue}>
-                  {group.members?.length ?? 0}
-                </Text>{" "}
-                / {group.max_members ?? "-"} membres
-              </Text>
-            </View>
-            <View style={styles.headerRight}>
-              <View
-                style={[
-                  styles.countBadge,
-                  {
-                    backgroundColor:
-                      colors.groupCardAdminButton ?? colors.primary,
-                  },
-                ]}
-              >
-                <Text style={styles.countBadgeText}>
-                  {group.members?.length ?? 0}
-                </Text>
-              </View>
-              {isAdmin && (
-                <TouchableOpacity
-                  style={styles.adminButton}
-                  onPress={handleEditName}
-                >
-                  <Text style={styles.adminButtonText}>Modifier</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+    <ThemedView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.section}>
+          <ThemedText type="title" style={styles.title}>
+            {group.name}
+          </ThemedText>
+          <ThemedText style={styles.subtitle}>
+            <ThemedText style={styles.infoValue}>
+              {group.members?.length ?? 0}
+            </ThemedText>
+            {" / "}
+            {group.max_members ?? "-"} membres
+          </ThemedText>
+
+          <View style={styles.row}>
+            <ThemedText style={styles.metaLabel}>Admin :</ThemedText>
+            <ThemedText style={styles.metaValue}>
+              {group.admin_name ?? "-"}
+            </ThemedText>
           </View>
 
           {group.winnerLastMonth?.name && (
-            <View style={styles.winnerRowCustom}>
-              <View style={styles.winnerBadge}>
-                <Text style={styles.winnerEmoji}>🏆</Text>
-                <Text style={styles.winnerLabel}>Gagnant du mois dernier</Text>
-              </View>
-              <Text style={styles.winnerName}>
+            <View style={styles.row}>
+              <ThemedText style={styles.metaLabel}>
+                Gagnant du mois dernier :
+              </ThemedText>
+              <ThemedText style={styles.metaValue}>
                 {group.winnerLastMonth.name}
-              </Text>
+              </ThemedText>
             </View>
           )}
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoText}>
-              Admin :{" "}
-              <Text style={styles.infoValue}>{group.admin_name ?? "-"}</Text>
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.rankingBlock}>
-          <Text style={styles.sectionTitle}>Membres</Text>
-          {group.members?.map((member, idx) => (
-            <View
-              key={String(member.id) + "-" + idx}
-              style={[styles.participantRow, idx === 0 && styles.leaderRow]}
-            >
-              <Text style={styles.medal}>{getMedal(idx)}</Text>
-              <Text
-                style={idx === 0 ? styles.leaderName : styles.participantName}
+          {isAdmin && (
+            <View style={styles.actionsRow}>
+              <TouchableOpacity
+                onPress={handleEditName}
+                style={styles.buttonPrimary}
               >
-                {member.name}
-              </Text>
-              <Text style={idx === 0 ? styles.leaderScore : styles.score}>
-                {member.totalEarned ?? 0} €
-              </Text>
-
-              {isAdmin && (
-                <TouchableOpacity
-                  style={styles.iconButton}
-                  onPress={() =>
-                    Alert.alert("Supprimer le membre", "Fonction à implémenter")
-                  }
-                >
-                  <Text style={styles.iconText}>🗑️</Text>
-                </TouchableOpacity>
-              )}
+                <ThemedText style={styles.buttonPrimaryText}>
+                  Modifier le nom
+                </ThemedText>
+              </TouchableOpacity>
             </View>
-          ))}
+          )}
         </View>
 
-        {isAdmin ? (
-          <View style={styles.actionsRow}>
-            <TouchableOpacity
-              style={styles.buttonPrimary}
-              onPress={handleAddMember}
-            >
-              <Text style={styles.buttonPrimaryText}>Ajouter un membre</Text>
-            </TouchableOpacity>
+        <View style={styles.section}>
+          <ThemedText type="subtitle">Membres</ThemedText>
 
-            <TouchableOpacity
-              style={[styles.buttonPrimary, styles.buttonDanger]}
-              onPress={() =>
-                Alert.alert("Supprimer le groupe", "Fonction à implémenter")
-              }
-            >
-              <Text style={[styles.buttonPrimaryText, styles.buttonDangerText]}>
-                Supprimer le groupe
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.actionsRowSingle}>
-            <TouchableOpacity
-              style={styles.buttonPrimary}
-              onPress={() =>
-                Alert.alert("Quitter le groupe", "Fonction à implémenter")
-              }
-            >
-              <Text style={styles.buttonPrimaryText}>Quitter le groupe</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+          {group.members?.length ? (
+            group.members.map((member, idx) => (
+              <View key={`${member.id ?? idx}-${idx}`} style={styles.memberRow}>
+                <ThemedText style={styles.medal}>{getMedal(idx)}</ThemedText>
+                <ThemedText
+                  style={idx === 0 ? styles.leaderName : styles.memberName}
+                >
+                  {member.name}
+                </ThemedText>
+                <ThemedText style={styles.memberScore}>
+                  {member.totalEarned ?? 0} €
+                </ThemedText>
+
+                {isAdmin && (
+                  <TouchableOpacity
+                    onPress={() =>
+                      Alert.alert(
+                        "Supprimer le membre",
+                        "Fonction à implémenter"
+                      )
+                    }
+                  >
+                    <ThemedText style={styles.iconText}>🗑️</ThemedText>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ))
+          ) : (
+            <ThemedText>Aucun membre</ThemedText>
+          )}
+        </View>
+
+        <View style={styles.section}>
+          {isAdmin ? (
+            <View style={styles.actionsRow}>
+              <TouchableOpacity
+                onPress={handleAddMember}
+                style={styles.buttonPrimary}
+              >
+                <ThemedText style={styles.buttonPrimaryText}>
+                  Ajouter un membre
+                </ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() =>
+                  Alert.alert("Supprimer le groupe", "Fonction à implémenter")
+                }
+                style={styles.buttonDanger}
+              >
+                <ThemedText style={styles.buttonDangerText}>
+                  Supprimer le groupe
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.actionsRow}>
+              <TouchableOpacity
+                onPress={() =>
+                  Alert.alert("Quitter le groupe", "Fonction à implémenter")
+                }
+                style={styles.buttonPrimary}
+              >
+                <ThemedText style={styles.buttonPrimaryText}>
+                  Quitter le groupe
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </ThemedView>
   );
 }
 
-const getStyles = (theme: "light" | "dark") => {
-  const colors = Colors[theme];
-  return StyleSheet.create({
-    safeArea: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-
-    scrollContent: {
-      paddingBottom: 24,
-      paddingTop: 12,
-      paddingHorizontal: 20,
-    },
-
-    card: {
-      backgroundColor: colors.groupCardBg,
-      borderRadius: 16,
-      marginHorizontal: 0,
-      marginTop: 8,
-      padding: 16,
-      elevation: 3,
-      shadowColor: "#000",
-      shadowOpacity: 0.08,
-      shadowRadius: 8,
-    },
-
-    headerRowCustom: {
+const getStyles = (colors: any) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 16, paddingBottom: 40 },
+    section: { marginBottom: 16 },
+    row: { flexDirection: "row", alignItems: "center", marginTop: 8 },
+    actionsRow: { flexDirection: "row", marginTop: 12 },
+    simpleButton: { padding: 10, borderRadius: 8, marginRight: 8 },
+    memberRow: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: 8,
-    },
-
-   
-    headerMain: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "flex-start",
-    },
-    groupSubtitle: {
-      color: colors.text,
-      fontSize: 13,
-      marginTop: 2,
-    },
-    headerRight: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
- 
-    groupName: {
-      fontSize: 32,
-      fontWeight: "bold",
-      color: colors.title,
-      flex: 1,
-      textAlign: "left",
-    },
-    adminButton: {
-      marginLeft: 8,
-      borderRadius: 8,
-      paddingVertical: 6,
-      paddingHorizontal: 12,
-      backgroundColor: colors.primary,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    adminButtonText: {
-      fontWeight: "700",
-      fontSize: 13,
-      color: colors.onPrimary || colors.background,
-    },
-    winnerRowCustom: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginBottom: 8,
-      marginTop: 6,
-    },
-    winnerBadge: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: colors.groupCardLeaderBg,
-      paddingVertical: 6,
-      paddingHorizontal: 10,
-      borderRadius: 16,
-      marginRight: 12,
-    },
-    winnerEmoji: {
-      marginRight: 8,
-      fontSize: 16,
-    },
-    winnerLabel: {
-      fontSize: 13,
-      marginRight: 6,
-      color: colors.text,
-    },
-    winnerName: {
-      fontWeight: "700",
-      fontSize: 13,
-      color: colors.groupCardHighlight,
-    },
-    infoRow: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-    },
-    infoText: {
-      color: colors.text,
-      fontSize: 15,
-      marginRight: 16,
-      marginBottom: 2,
-    },
-    infoValue: {
-      color: colors.text,
-      fontWeight: "700",
-    },
-    rankingBlock: {
-      backgroundColor: colors.groupCardBg,
-      borderRadius: 12,
-      marginHorizontal: 0,
-      marginTop: 12,
       paddingVertical: 8,
-      paddingHorizontal: 0,
-      elevation: 1,
     },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: colors.primary,
-      marginBottom: 8,
-      textAlign: "left",
-      marginLeft: 4,
-      marginTop: 8,
-    },
-    participantRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingVertical: 10,
-      marginHorizontal: 0,
-      paddingHorizontal: 12,
-    },
-    memberAvatar: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: colors.primary,
-      alignItems: "center",
-      justifyContent: "center",
-      marginRight: 8,
-    },
-    medal: {
-      width: 28,
-      textAlign: "center",
-      marginRight: 6,
-      fontSize: 18,
-    },
-    leaderRow: {
-      borderRadius: 8,
-      backgroundColor: colors.groupCardLeaderBg,
-    },
-    rank: {
-      width: 32,
-      fontSize: 18,
-      color: colors.groupCardTitle,
-      fontWeight: "700",
-      textAlign: "right",
-    },
-    leaderRank: {
-      fontSize: 20,
-      fontWeight: "700",
-      color: colors.groupCardHighlight,
-    },
-    participantName: {
-      flex: 1,
-      fontSize: 17,
-      color: colors.text,
-      marginLeft: 12,
-    },
+    medal: { width: 36, textAlign: "center" },
+    memberName: { flex: 1, marginLeft: 8, color: colors.groupCardText },
     leaderName: {
       flex: 1,
-      fontSize: 18,
-      fontWeight: "800",
-      color: colors.primary,
-      marginLeft: 12,
-    },
-    score: {
-      fontSize: 15,
+      marginLeft: 8,
       fontWeight: "700",
-      color: colors.primary,
-      marginLeft: 8,
+      color: colors.groupCardHighlight,
     },
-    leaderScore: {
-      fontSize: 16,
-      fontWeight: "700",
-      color: colors.primary,
-      marginLeft: 8,
-    },
-    iconButton: {
-      marginLeft: 8,
-      padding: 6,
-      backgroundColor: "transparent",
-    },
-    iconText: {
-      fontSize: 18,
-      color: colors.groupCardTitle,
-    },
-    actionsRow: {
-      marginTop: 32,
-      flexDirection: "row",
-      gap: 12,
-      justifyContent: "center",
-      paddingHorizontal: 16,
-    },
-    actionsRowSingle: {
-      marginTop: 32,
-      alignItems: "center",
-      paddingHorizontal: 16,
-    },
+    memberScore: { marginLeft: 12, color: colors.textDivers },
+    // additional styles to avoid inline
     emptyTitle: {
       marginTop: 32,
       textAlign: "center",
@@ -410,22 +216,26 @@ const getStyles = (theme: "light" | "dark") => {
       fontSize: 18,
     },
     buttonPrimary: {
-      backgroundColor: colors.primary,
-      paddingVertical: 12,
-      paddingHorizontal: 24,
+      backgroundColor: colors.bgButtonPrimary,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
       borderRadius: 8,
-      alignItems: "center",
+      marginRight: 8,
     },
-    buttonPrimaryText: {
-      color: colors.onPrimary || colors.background,
-      fontWeight: "700",
-      fontSize: 16,
-    },
+    buttonPrimaryText: { color: colors.textButtonPrimary, fontWeight: "700" },
     buttonDanger: {
       backgroundColor: colors.background,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      borderRadius: 8,
+      marginLeft: 8,
     },
-    buttonDangerText: {
-      color: colors.dangerBg,
-    },
+    buttonDangerText: { color: colors.dangerBg, fontWeight: "700" },
+    iconText: { color: colors.groupCardTitle, fontSize: 18 },
+    // styles requis par le composant
+    title: { fontSize: 24, fontWeight: "700", color: colors.groupCardTitle },
+    subtitle: { marginTop: 6, color: colors.text },
+    infoValue: { fontWeight: "700", color: colors.textDivers },
+    metaLabel: { fontWeight: "700", color: colors.textDivers },
+    metaValue: { marginLeft: 8, color: colors.text },
   });
-};
