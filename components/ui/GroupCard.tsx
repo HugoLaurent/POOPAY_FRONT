@@ -67,10 +67,7 @@ const GroupCard: React.FC<GroupCardProps> = ({ item, userId, onPress }) => {
           const medalIcons = ["🥇", "🥈", "🥉"];
           const medal = medalIcons[memberIndex] ?? String(memberIndex + 1);
           return (
-            <View
-              key={member.id || memberIndex}
-              style={[styles.participantRow, isLeader && styles.leaderRow]}
-            >
+            <View key={member.id || memberIndex} style={styles.participantRow}>
               <Text style={styles.medal}>{medal}</Text>
               <Text
                 style={isLeader ? styles.leaderName : styles.participantName}
@@ -118,12 +115,12 @@ const getStyles = (colors: any) =>
       textAlign: "left",
     },
     infoValue: {
-      color: colors.groupCardText,
+      color: colors.textDivers,
       fontWeight: "bold",
     },
     adminButton: {
       marginLeft: 8,
-      backgroundColor: colors.groupCardAdminButton,
+      backgroundColor: colors.bgButtonPrimary,
       borderRadius: 6,
       paddingVertical: 4,
       paddingHorizontal: 12,
@@ -131,7 +128,7 @@ const getStyles = (colors: any) =>
       elevation: 1,
     },
     adminButtonText: {
-      color: colors.groupCardAdminText,
+      color: colors.textButtonPrimary,
       fontWeight: "bold",
       fontSize: 14,
     },
@@ -146,12 +143,12 @@ const getStyles = (colors: any) =>
     winnerLabel: {
       fontWeight: "bold",
       fontSize: 14,
-      color: colors.groupCardText,
+      color: colors.textDivers,
     },
     winnerName: {
       fontWeight: "bold",
       fontSize: 14,
-      color: "white",
+      color: colors.textDivers,
     },
     rankingBlock: {},
     participantRow: {
@@ -159,18 +156,7 @@ const getStyles = (colors: any) =>
       alignItems: "center",
       paddingVertical: 7,
     },
-    leaderRow: {},
-    rank: {
-      fontSize: 16,
-      color: colors.groupCardTitle,
-      fontWeight: "bold",
-      textAlign: "right",
-    },
-    leaderRank: {
-      fontSize: 17,
-      color: colors.groupCardHighlight,
-      fontWeight: "bold",
-    },
+
     medal: {
       fontSize: 20,
       marginRight: 8,
@@ -180,26 +166,26 @@ const getStyles = (colors: any) =>
     participantName: {
       flex: 1,
       fontSize: 16,
-      color: colors.groupCardText,
+      color: colors.textDivers,
       marginLeft: 8,
     },
     leaderName: {
       flex: 1,
       fontSize: 17,
       fontWeight: "bold",
-      color: colors.groupCardHighlight,
+      color: colors.textDivers,
       marginLeft: 8,
     },
     score: {
       fontSize: 15,
       fontWeight: "bold",
-      color: colors.groupCardText,
+      color: colors.textDivers,
       marginLeft: 8,
     },
     leaderScore: {
       fontSize: 16,
       fontWeight: "bold",
-      color: colors.groupCardHighlight,
+      color: colors.textDivers,
       marginLeft: 8,
     },
   });

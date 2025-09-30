@@ -126,9 +126,6 @@ export default function GroupDetailsScreen() {
               key={String(member.id) + "-" + idx}
               style={[styles.participantRow, idx === 0 && styles.leaderRow]}
             >
-              <View style={styles.memberAvatar}>
-                {getInitials(member.name)}
-              </View>
               <Text style={styles.medal}>{getMedal(idx)}</Text>
               <Text
                 style={idx === 0 ? styles.leaderName : styles.participantName}
@@ -197,44 +194,37 @@ const getStyles = (theme: "light" | "dark") => {
       flex: 1,
       backgroundColor: colors.background,
     },
+
     scrollContent: {
       paddingBottom: 24,
       paddingTop: 12,
+      paddingHorizontal: 20,
     },
+
     card: {
       backgroundColor: colors.groupCardBg,
       borderRadius: 16,
-      marginHorizontal: 16,
+      marginHorizontal: 0,
       marginTop: 8,
-      padding: 20,
+      padding: 16,
       elevation: 3,
       shadowColor: "#000",
       shadowOpacity: 0.08,
       shadowRadius: 8,
     },
+
     headerRowCustom: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
       marginBottom: 8,
     },
-    avatar: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      backgroundColor: colors.groupCardTitle,
-      alignItems: "center",
-      justifyContent: "center",
-      marginRight: 12,
-    },
-    avatarText: {
-      color: colors.background,
-      fontWeight: "700",
-      fontSize: 16,
-    },
+
+   
     headerMain: {
       flex: 1,
       justifyContent: "center",
+      alignItems: "flex-start",
     },
     groupSubtitle: {
       color: colors.text,
@@ -245,23 +235,11 @@ const getStyles = (theme: "light" | "dark") => {
       flexDirection: "row",
       alignItems: "center",
     },
-    countBadge: {
-      minWidth: 36,
-      height: 28,
-      borderRadius: 14,
-      alignItems: "center",
-      justifyContent: "center",
-      marginRight: 8,
-      paddingHorizontal: 8,
-    },
-    countBadgeText: {
-      color: colors.onPrimary || colors.background,
-      fontWeight: "700",
-    },
+ 
     groupName: {
-      fontSize: 24,
+      fontSize: 32,
       fontWeight: "bold",
-      color: colors.groupCardTitle,
+      color: colors.title,
       flex: 1,
       textAlign: "left",
     },
@@ -270,14 +248,14 @@ const getStyles = (theme: "light" | "dark") => {
       borderRadius: 8,
       paddingVertical: 6,
       paddingHorizontal: 12,
-      backgroundColor: colors.groupCardTitle,
+      backgroundColor: colors.primary,
       alignItems: "center",
       justifyContent: "center",
     },
     adminButtonText: {
       fontWeight: "700",
       fontSize: 13,
-      color: colors.background,
+      color: colors.onPrimary || colors.background,
     },
     winnerRowCustom: {
       flexDirection: "row",
@@ -325,7 +303,7 @@ const getStyles = (theme: "light" | "dark") => {
     rankingBlock: {
       backgroundColor: colors.groupCardBg,
       borderRadius: 12,
-      marginHorizontal: 16,
+      marginHorizontal: 0,
       marginTop: 12,
       paddingVertical: 8,
       paddingHorizontal: 0,
@@ -334,23 +312,24 @@ const getStyles = (theme: "light" | "dark") => {
     sectionTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: colors.text,
+      color: colors.primary,
       marginBottom: 8,
       textAlign: "left",
-      marginLeft: 16,
+      marginLeft: 4,
       marginTop: 8,
     },
     participantRow: {
       flexDirection: "row",
       alignItems: "center",
       paddingVertical: 10,
-      marginHorizontal: 12,
+      marginHorizontal: 0,
+      paddingHorizontal: 12,
     },
     memberAvatar: {
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: colors.groupCardTitle,
+      backgroundColor: colors.primary,
       alignItems: "center",
       justifyContent: "center",
       marginRight: 8,
@@ -387,19 +366,19 @@ const getStyles = (theme: "light" | "dark") => {
       flex: 1,
       fontSize: 18,
       fontWeight: "800",
-      color: colors.groupCardHighlight,
+      color: colors.primary,
       marginLeft: 12,
     },
     score: {
       fontSize: 15,
       fontWeight: "700",
-      color: colors.groupCardTitle,
+      color: colors.primary,
       marginLeft: 8,
     },
     leaderScore: {
       fontSize: 16,
       fontWeight: "700",
-      color: colors.groupCardHighlight,
+      color: colors.primary,
       marginLeft: 8,
     },
     iconButton: {
@@ -431,14 +410,14 @@ const getStyles = (theme: "light" | "dark") => {
       fontSize: 18,
     },
     buttonPrimary: {
-      backgroundColor: colors.groupCardHighlight,
+      backgroundColor: colors.primary,
       paddingVertical: 12,
       paddingHorizontal: 24,
       borderRadius: 8,
       alignItems: "center",
     },
     buttonPrimaryText: {
-      color: colors.background,
+      color: colors.onPrimary || colors.background,
       fontWeight: "700",
       fontSize: 16,
     },

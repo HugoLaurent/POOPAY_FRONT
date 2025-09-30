@@ -63,7 +63,7 @@ export const Colors = {
     textSwitchLogin: '#8B4513',
     // Button
     bgButtonPrimary: '#C7A16E',
-    textButtonPrimary: '#000',
+    textButtonPrimary: '#fff',
     // INPUT
     inputBorder: '#5c59543d',
     inputBackground: '#22211e70',

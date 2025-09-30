@@ -291,10 +291,8 @@ const getStyles = (colors: any) =>
       backgroundColor: "rgba(139,69,19,0.08)",
     },
     calendarDayButtonActive: {
-      backgroundColor: colors.primary,
-      borderWidth: 1,
-      borderColor: colors.primary,
-      shadowColor: colors.primary,
+      backgroundColor: colors.bgButtonPrimary,
+
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.2,
       shadowRadius: 4,

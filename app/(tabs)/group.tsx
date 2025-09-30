@@ -205,7 +205,7 @@ const makeStyles = (colors: any, bottomGutter: number, period: string) =>
       marginTop: 2,
     },
     addButton: {
-      backgroundColor: colors.primary,
+      backgroundColor: colors.bgButtonPrimary,
       borderRadius: 20,
       paddingVertical: 6,
       paddingHorizontal: 16,
@@ -218,7 +218,7 @@ const makeStyles = (colors: any, bottomGutter: number, period: string) =>
       fontWeight: "bold",
       fontSize: 22,
       lineHeight: 24,
-      color: colors.groupCardAdminText,
+      color: colors.textButtonPrimary,
     },
 
     // period tabs
@@ -233,18 +233,23 @@ const makeStyles = (colors: any, bottomGutter: number, period: string) =>
       paddingHorizontal: 14,
       borderRadius: 16,
       marginHorizontal: 2,
-      backgroundColor: colors.periodTabBg,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(139,69,19,0.08)",
     },
     periodTabActive: {
-      backgroundColor: colors.periodTabActiveBg,
+      backgroundColor: colors.bgButtonPrimary,
+
+      elevation: 3,
     },
     periodTabText: {
       fontWeight: "700",
       fontSize: 14,
-      color: colors.periodTabText,
+      color: colors.textDivers,
     },
     periodTabTextActive: {
-      color: colors.periodTabTextActive,
+      color: "white",
+      fontWeight: "bold",
     },
 
     // list
