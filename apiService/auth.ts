@@ -1,3 +1,23 @@
+// Récupérer tous les groupes d'un utilisateur
+export const getGroupsByUserId = async (
+    token: string,
+    userId: string,
+    period?: 'week' | 'month' | 'past'
+) => {
+    let url = `${API_BASE_URL}/users/${userId}/groups`;
+    if (period) {
+        url += `?period=${period}`;
+    }
+    const response = await fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    const data = await response.json();
+    return data;
+};
+
 // Détecter l'environnement pour utiliser la bonne URL
 const API_BASE_URL = 'http://192.168.1.10:3333';  // Pour l'émulateur Android
 // Récupérer toutes les données d'initialisation (profil, abonnement, sessions, groupes, settings...)
@@ -8,51 +28,19 @@ export const getInitData = async (token: string, userId: string) => {
             'Content-Type': 'application/json',
         },
     });
-    return response.json();
+    const data = await response.json();
+    return data;
 };
-// Récupérer l'abonnement de l'utilisateur
-export const getSubscription = async (token: string, userId: string) => {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}/subscription`, {
+
+// Récupérer un groupe par son id
+export const getGroupById = async (token: string, groupId: string) => {
+
+    const response = await fetch(`${API_BASE_URL}/groups/${groupId}`, {
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
         },
     });
-    return response.json();
-};
-
-// Récupérer les paramètres utilisateur
-export const getSettings = async (token: string, userId: string) => {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}/settings`, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
-    return response.json();
-};
-
-// Récupérer les sessions récentes (historique)
-export const getSessions = async (token: string, userId: string, { limit = 30 } = {}) => {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}/sessions?limit=${limit}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
-    return response.json();
-};
-
-// Récupérer la liste des groupes et leurs métadonnées
-export const getGroups = async (token: string, userId: string) => {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}/groups`, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
-    console.log('📋 Données groupes reçues:', await response.clone().json());
-
     return response.json();
 };
 

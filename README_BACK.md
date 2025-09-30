@@ -2,9 +2,146 @@
 
 > API Backend pour l'application POOPAY - "Gagnez de l'argent en allant aux toilettes !"
 
-## 📋 Table des matières
+## Authentification
+
+### POST /login
+
+**Description :** Connexion utilisateur, retourne un token d'accès.
+
+**Requête :**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+**Réponse (succès) :**
+
+```json
+{
+  "status": "success",
+  "data": {
+    "user": {
+      "id": 1,
+      "username": "JeanDupont",
+      "email": "user@example.com"
+    },
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGci..."
+  }
+}
+```
+
+**Réponse (erreur) :**
+
+```json
+{
+  "status": "error",
+  "message": "Identifiants invalides"
+}
+```
+
+---
+
+### GET /me
+
+**Description :** Retourne les infos de l'utilisateur connecté.
+
+**Headers :**
+`Authorization: Bearer {token}`
+
+**Réponse :**
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": 1,
+    "username": "JeanDupont",
+    "email": "user@example.com",
+    "hourly_rate": 15.5,
+    "currency": "EUR",
+    "contract_hours_per_month": 151.67,
+    "category_id": 2,
+    "department_code": "75"
+  }
+}
+```
+
+---
+
+### GET /users/{id}/today
+
+**Description :** Récupère la session du jour pour un utilisateur.
+
+**Headers :**
+`Authorization: Bearer {token}`
+
+**Réponse :**
+
+```json
+{
+  "status": "success",
+  "data": {
+    "session": {
+      "id": 42,
+      "user_id": 1,
+      "start_time": "2025-09-29T08:00:00Z",
+      "end_time": "2025-09-29T08:10:00Z",
+      "status": "completed",
+      "duration_minutes": 10,
+      "amount_earned": 2.58
+    }
+  }
+}
+```
+
+---
+
+# �️ Modèles de données
+
+## Utilisateur (`User`)
+
+| Champ                    | Type    | Description                  |
+| ------------------------ | ------- | ---------------------------- |
+| id                       | integer | Identifiant unique           |
+| username                 | string  | Nom d'utilisateur            |
+| email                    | string  | Email                        |
+| hourly_rate              | float   | Taux horaire (€)             |
+| currency                 | string  | Devise (ex: EUR)             |
+| contract_hours_per_month | float   | Heures de contrat mensuelles |
+| category_id              | integer | ID de la catégorie           |
+| department_code          | string  | Code du département          |
+
+## �📋 Table des matières
+
+## Session (`Session`)
+
+| Champ            | Type    | Description                    |
+| ---------------- | ------- | ------------------------------ |
+| id               | integer | Identifiant unique             |
+| user_id          | integer | ID de l'utilisateur            |
+| start_time       | string  | Début de la session (ISO 8601) |
+| end_time         | string  | Fin de la session (ISO 8601)   |
+| status           | string  | Statut (pending/completed)     |
+| duration_minutes | integer | Durée en minutes               |
+| amount_earned    | float   | Montant gagné (€)              |
+
+## Statuts d'erreur courants
+
+| Code | Signification         | Exemple de message                 |
+| ---- | --------------------- | ---------------------------------- |
+| 401  | Non authentifié       | Token manquant ou invalide         |
+| 403  | Accès interdit        | Accès refusé                       |
+| 404  | Ressource non trouvée | Utilisateur ou session introuvable |
+| 422  | Données invalides     | Erreur de validation               |
+| 500  | Erreur serveur        | Erreur interne inattendue          |
 
 - [Vue d'ensemble](#vue-densemble)
+
+---
+
 - [Architecture](#architecture)
 - [Installation & Configuration](#installation--configuration)
 - [Structure du projet](#structure-du-projet)

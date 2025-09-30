@@ -11,6 +11,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  token: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   signup: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -25,6 +26,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Vérification initiale au démarrage
@@ -44,6 +46,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         await AsyncStorage.setItem("access_token", response.token);
         await AsyncStorage.setItem("user_data", JSON.stringify(response.user));
         setUser(response.user);
+        setToken(response.token);
         return true;
       }
 
@@ -85,10 +88,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = async (): Promise<void> => {
     try {
-      const token = await AsyncStorage.getItem("access_token");
-
-      if (token) {
-        await authAPI.logout(token);
+      const tokenValue = await AsyncStorage.getItem("access_token");
+      if (tokenValue) {
+        await authAPI.logout(tokenValue);
       }
     } catch (error) {
       console.error("Erreur de déconnexion:", error);
@@ -96,32 +98,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Nettoyer le stockage local dans tous les cas
       await AsyncStorage.multiRemove(["access_token", "user_data"]);
       setUser(null);
+      setToken(null);
     }
   };
 
   const checkAuthStatus = async (): Promise<void> => {
     try {
-      const token = await AsyncStorage.getItem("access_token");
+      const tokenValue = await AsyncStorage.getItem("access_token");
       const userData = await AsyncStorage.getItem("user_data");
 
-      if (token && userData) {
+      if (tokenValue && userData) {
         // Vérifier si le token est encore valide
-        const response = await authAPI.getProfile(token);
+        const response = await authAPI.getProfile(tokenValue);
 
         if (response.status === "success" && response.data) {
           const user = JSON.parse(userData);
           setUser(user);
+          setToken(tokenValue);
         } else {
           // Token invalide, nettoyer
           await AsyncStorage.multiRemove(["access_token", "user_data"]);
           setUser(null);
+          setToken(null);
         }
       } else {
         setUser(null);
+        setToken(null);
       }
     } catch (error) {
       console.error("Erreur de vérification:", error);
       setUser(null);
+      setToken(null);
     } finally {
       setIsLoading(false);
     }
@@ -130,6 +137,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = {
     user,
     isLoading,
+    token,
     login,
     signup,
     logout,

@@ -27,29 +27,21 @@ export default function LoginScreen() {
   const { initializeAppData } = useAppData();
 
   const handleSubmit = async () => {
-    console.log("🎯 HandleSubmit: Début");
-
     // if (!email || !password) {
     //   Alert.alert("Erreur", "Veuillez remplir tous les champs");
     //   return;
     // }
 
-    console.log("🎯 HandleSubmit: Champs validés");
     setIsLoading(true);
 
     try {
       let success = false;
-      console.log("🎯 HandleSubmit: Mode:", isSignupMode ? "signup" : "login");
 
       if (isSignupMode) {
-        console.log("🎯 HandleSubmit: Appel signup");
         success = await signup(email, password);
       } else {
-        console.log("🎯 HandleSubmit: Appel login");
         success = await login("admin@example.com", "admin1234");
       }
-
-      console.log("🎯 HandleSubmit: Résultat:", success);
 
       if (success) {
         // Charger les données App avant navigation
@@ -57,10 +49,8 @@ export default function LoginScreen() {
         if (token) {
           await initializeAppData(token);
         }
-        console.log("🎯 HandleSubmit: Navigation vers tabs");
         router.push("/(tabs)");
       } else {
-        console.log("🎯 HandleSubmit: Échec, affichage erreur");
         Alert.alert(
           "Erreur",
           isSignupMode

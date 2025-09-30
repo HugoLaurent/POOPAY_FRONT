@@ -47,25 +47,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const initializeAppData = async (token: string) => {
     setIsAppLoading(true);
     try {
-      // Profil
+      // Un seul appel pour tout récupérer
+      // getInitData doit retourner { profile, subscription, settings, sessions, groups }
       const profileRes = await authAPI.getProfile(token);
       const user = profileRes.user || profileRes;
-      setProfile(user);
       const userId = user.id;
-
-      // Abonnement
-      const subRes = await authAPI.getSubscription(token, userId);
-      setSubscription(subRes.subscription || subRes);
-
-      // Sessions récentes
-      const sessionsRes = await authAPI.getSessions(token, userId, {
-        limit: 30,
-      });
-      setSessions(sessionsRes.sessions || sessionsRes);
-
-      // Groupes
-      const groupsRes = await authAPI.getGroups(token, userId);
-      setGroups(groupsRes.groups || groupsRes);
+      const initRes = await authAPI.getInitData(token, userId);
+      setProfile(initRes.profile || null);
+      setSubscription(initRes.subscription || null);
+      setSettings(initRes.settings || null);
+      setSessions(initRes.sessions || []);
+      setGroups(initRes.groups || []);
     } catch (e) {
       console.error("Erreur chargement données app:", e);
     } finally {

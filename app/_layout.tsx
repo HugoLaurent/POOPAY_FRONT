@@ -45,7 +45,7 @@ export default function RootLayout() {
         >
           <SafeAreaView
             style={{ flex: 1, backgroundColor: "#151718" }}
-            edges={["top", "bottom"]}
+            edges={["top"]}
           >
             <RootStack />
             <StatusBar style="auto" />
@@ -86,6 +86,13 @@ function RootStack() {
           headerShown: false,
           animation: "slide_from_right", // Slide depuis la droite pour l'app
           animationDuration: 400, // Un peu plus lent pour être fluide
+        }}
+      />
+      <Stack.Screen
+        name="group-details"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
         }}
       />
       <Stack.Screen

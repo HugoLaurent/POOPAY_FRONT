@@ -130,7 +130,7 @@ export default function HomeScreen() {
           </Text>
           <Text style={styles.appTitle}>POOPAY</Text>
           <Text style={[styles.subtitle, { color: themedSubtitleColor }]}>
-            L&apos;app la plus fun pour traquer tes cacas ! 🚽
+            L&apos;app la plus fun pour traquer sdtes cacas ! 🚽
           </Text>
         </View>
 
