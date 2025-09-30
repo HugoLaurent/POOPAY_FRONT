@@ -14,7 +14,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors } from "@/constants/theme";
 import { ThemedView } from "@/components/themed-view";
 
 export default function LoginScreen() {
@@ -67,17 +68,11 @@ export default function LoginScreen() {
     }
   };
 
-  const backgroundColor = useThemeColor({}, "background");
-  const inputBg = useThemeColor(
-    { light: "rgba(139, 69, 19, 0.08)", dark: "rgba(139, 69, 19, 0.15)" },
-    "background"
-  );
-  const inputBorder = useThemeColor(
-    { light: "rgba(139, 69, 19, 0.2)", dark: "rgba(139, 69, 19, 0.3)" },
-    "background"
-  );
+  const theme = useColorScheme() ?? "light";
+  const colors = Colors[theme];
+  const styles = getStyles(colors);
   return (
-    <ThemedView style={[styles.safeArea, { backgroundColor }]}>
+    <ThemedView style={styles.safeArea}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -102,20 +97,11 @@ export default function LoginScreen() {
             <ThemedView style={styles.inputContainer}>
               <ThemedText style={styles.label}>Email</ThemedText>
               <TextInput
-                style={[
-                  styles.input,
-                  { backgroundColor: inputBg, borderColor: inputBorder },
-                ]}
+                style={[styles.input, styles.inputThemed]}
                 value={email}
                 onChangeText={setEmail}
                 placeholder="ton.email@example.com"
-                placeholderTextColor={useThemeColor(
-                  {
-                    light: "rgba(139, 69, 19, 0.5)",
-                    dark: "rgba(236, 237, 238, 0.5)",
-                  },
-                  "text"
-                )}
+                placeholderTextColor={colors.text + "80"}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -125,20 +111,11 @@ export default function LoginScreen() {
             <ThemedView style={styles.inputContainer}>
               <ThemedText style={styles.label}>Mot de passe</ThemedText>
               <TextInput
-                style={[
-                  styles.input,
-                  { backgroundColor: inputBg, borderColor: inputBorder },
-                ]}
+                style={[styles.input, styles.inputThemed]}
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Au moins 6 caractères..."
-                placeholderTextColor={useThemeColor(
-                  {
-                    light: "rgba(139, 69, 19, 0.5)",
-                    dark: "rgba(236, 237, 238, 0.5)",
-                  },
-                  "text"
-                )}
+                placeholderTextColor={colors.text + "80"}
                 secureTextEntry
                 autoCapitalize="none"
               />
@@ -183,99 +160,106 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 40,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  logo: {
-    fontSize: 48,
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#8B4513",
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 14,
-    opacity: 0.8,
-    textAlign: "center",
-    marginHorizontal: 20,
-  },
-  form: {
-    gap: 20,
-    marginBottom: 40,
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#8B4513",
-    marginLeft: 4,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: "#8B4513",
-  },
-  submitButton: {
-    backgroundColor: "#8B4513",
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 10,
-    shadowColor: "#8B4513",
-    shadowOffset: {
-      width: 0,
-      height: 4,
+function getStyles(colors: any) {
+  return StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  submitButtonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  switchButton: {
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  switchButtonText: {
-    color: "#8B4513",
-    fontSize: 14,
-    opacity: 0.8,
-  },
-  footer: {
-    alignItems: "center",
-  },
-  footerText: {
-    fontSize: 12,
-    opacity: 0.6,
-    textAlign: "center",
-    fontStyle: "italic",
-  },
-});
+    container: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: "center",
+      paddingHorizontal: 20,
+      paddingVertical: 40,
+    },
+    header: {
+      alignItems: "center",
+      marginBottom: 40,
+    },
+    logo: {
+      fontSize: 48,
+      marginBottom: 8,
+    },
+    title: {
+      fontSize: 32,
+      fontWeight: "bold",
+      color: colors.groupCardTitle,
+      marginBottom: 8,
+    },
+    subtitle: {
+      fontSize: 14,
+      opacity: 0.8,
+      textAlign: "center",
+      marginHorizontal: 20,
+    },
+    form: {
+      gap: 20,
+      marginBottom: 40,
+    },
+    inputContainer: {
+      gap: 8,
+    },
+    label: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: colors.groupCardTitle,
+      marginLeft: 4,
+    },
+    input: {
+      borderWidth: 1,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: 16,
+      color: colors.groupCardTitle,
+    },
+    inputThemed: {
+      backgroundColor: colors.periodTabBg,
+      borderColor: colors.periodTabBg,
+    },
+    submitButton: {
+      backgroundColor: colors.groupCardAdminButton,
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: "center",
+      marginTop: 10,
+      shadowColor: colors.groupCardAdminButton,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+    disabledButton: {
+      opacity: 0.6,
+    },
+    submitButtonText: {
+      color: colors.onPrimary,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    switchButton: {
+      alignItems: "center",
+      paddingVertical: 12,
+    },
+    switchButtonText: {
+      color: colors.groupCardTitle,
+      fontSize: 14,
+      opacity: 0.8,
+    },
+    footer: {
+      alignItems: "center",
+    },
+    footerText: {
+      fontSize: 12,
+      opacity: 0.6,
+      textAlign: "center",
+      fontStyle: "italic",
+    },
+  });
+}

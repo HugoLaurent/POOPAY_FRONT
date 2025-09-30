@@ -1,15 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import * as authAPI from "../apiService/auth";
-
-interface GroupMeta {
-  id: string;
-  name: string;
-  memberCount: number;
-  userPlace: number;
-  leader: string;
-  members: GroupMember[];
-  // autres métadonnées utiles
-}
+import { GroupData } from "../types/group";
 
 interface Session {
   id: string;
@@ -26,7 +17,7 @@ interface AppData {
   subscription: any;
   settings: any;
   sessions: Session[];
-  groups: GroupMeta[];
+  groups: GroupData[];
   isAppLoading: boolean;
 }
 
@@ -41,7 +32,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [subscription, setSubscription] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [groups, setGroups] = useState<GroupMeta[]>([]);
+  const [groups, setGroups] = useState<GroupData[]>([]);
   const [isAppLoading, setIsAppLoading] = useState(true);
 
   const initializeAppData = async (token: string) => {
@@ -88,8 +79,3 @@ export function useAppData() {
     throw new Error("useAppData doit être utilisé dans AppProvider");
   return context;
 }
-
-export type GroupMember = {
-  username: string;
-  // Ajoute ici d'autres propriétés si besoin (score, avatar, etc)
-};

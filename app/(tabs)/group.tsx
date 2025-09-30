@@ -8,10 +8,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import GroupCard from "@/components/ui/GroupCard";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ThemedView } from "@/components/themed-view";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useRouter } from "expo-router";
 import { getGroupsByUserId } from "@/apiService/auth";
@@ -29,7 +30,14 @@ export default function GroupScreen() {
   // Hauteur utile pour éviter le recouvrement par la bottom tab bar
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
-  const bottomGutter = Math.max(insets.bottom, tabBarHeight) + 16; // marge basse
+  const bottomGutter = Math.max(insets.bottom, tabBarHeight || 0) + 16; // marge basse
+
+  // Couleurs du thème dynamiques
+  const theme = useColorScheme() ?? "light";
+  const colors = Colors[theme];
+
+  // Styles dépendants
+  const styles = makeStyles(colors, bottomGutter, period);
 
   const handleAddGroup = () => {
     alert("Fonction à implémenter : ajouter un groupe");
@@ -54,360 +62,207 @@ export default function GroupScreen() {
     }, [fetchGroups])
   );
 
-  console.log("groups:", groups[0]);
-
   if (loading) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <ThemedView style={[styles.safeArea, { paddingTop: insets.top }]}>
         <ActivityIndicator
+          style={styles.loadingIndicator}
           size="small"
-          color="#8B4513"
-          style={{ marginTop: 40 }}
+          color={colors.groupCardTitle}
         />
-        <Text style={{ color: "#8B4513", textAlign: "center", marginTop: 8 }}>
-          Chargement...
-        </Text>
-      </SafeAreaView>
+        <Text style={styles.loadingText}>Chargement...</Text>
+      </ThemedView>
+    );
+  }
+
+  if (!user?.id) {
+    return (
+      <ThemedView style={[styles.safeArea, { paddingTop: insets.top }]}>
+        <Text style={styles.loadingText}>Utilisateur non connecté.</Text>
+      </ThemedView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>Mes Groupes</Text>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddGroup}>
-          <Text style={styles.addButtonText}>＋</Text>
-        </TouchableOpacity>
-      </View>
+    <ThemedView style={[styles.safeArea, { paddingTop: insets.top }]}>
+      <View style={styles.container}>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>Mes Groupes</Text>
+          <TouchableOpacity style={styles.addButton} onPress={handleAddGroup}>
+            <Text style={styles.addButtonText}>＋</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Barre de filtres période */}
-      <View style={styles.periodTabs}>
-        <TouchableOpacity
-          style={[
-            styles.periodTab,
-            period === "week" && styles.periodTabActive,
-          ]}
-          onPress={() => setPeriod("week")}
-        >
-          <Text
+        {/* Barre de filtres période */}
+        <View style={styles.periodTabs}>
+          <TouchableOpacity
             style={[
-              styles.periodTabText,
-              period === "week" && styles.periodTabTextActive,
+              styles.periodTab,
+              period === "week" ? styles.periodTabActive : null,
             ]}
+            onPress={() => setPeriod("week")}
           >
-            Cette semaine
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.periodTab,
-            period === "month" && styles.periodTabActive,
-          ]}
-          onPress={() => setPeriod("month")}
-        >
-          <Text
-            style={[
-              styles.periodTabText,
-              period === "month" && styles.periodTabTextActive,
-            ]}
-          >
-            Ce mois-ci
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.periodTab,
-            period === "past" && styles.periodTabActive,
-          ]}
-          onPress={() => setPeriod("past")}
-        >
-          <Text
-            style={[
-              styles.periodTabText,
-              period === "past" && styles.periodTabTextActive,
-            ]}
-          >
-            Mois derniers
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Text
+              style={[
+                styles.periodTabText,
+                period === "week" ? styles.periodTabTextActive : null,
+              ]}
+            >
+              Cette semaine
+            </Text>
+          </TouchableOpacity>
 
-      <FlatList
-        style={{ flex: 1 }}
-        data={groups}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ paddingBottom: bottomGutter }}
-        renderItem={({ item }) => {
-          const isAdmin = String(item.admin_user_id) === String(user?.id);
-          const adminName =
-            item.members?.find(
-              (m: any) => String(m.id) === String(item.admin_user_id)
-            )?.name || "-";
+          <TouchableOpacity
+            style={[
+              styles.periodTab,
+              period === "month" ? styles.periodTabActive : null,
+            ]}
+            onPress={() => setPeriod("month")}
+          >
+            <Text
+              style={[
+                styles.periodTabText,
+                period === "month" ? styles.periodTabTextActive : null,
+              ]}
+            >
+              Ce mois-ci
+            </Text>
+          </TouchableOpacity>
 
-          return (
-            <TouchableOpacity
-              style={styles.groupCard}
-              onPress={() =>
+          <TouchableOpacity
+            style={[
+              styles.periodTab,
+              period === "past" ? styles.periodTabActive : null,
+            ]}
+            onPress={() => setPeriod("past")}
+          >
+            <Text
+              style={[
+                styles.periodTabText,
+                period === "past" ? styles.periodTabTextActive : null,
+              ]}
+            >
+              Mois derniers
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          style={styles.list}
+          data={groups}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => (
+            <GroupCard
+              item={item}
+              userId={user.id}
+              onPress={(itemData, adminName, isAdmin) =>
                 router.push({
                   pathname: "/group/details",
                   params: {
-                    group: JSON.stringify({ ...item, admin_name: adminName }),
+                    group: JSON.stringify({
+                      ...itemData,
+                      admin_name: adminName,
+                    }),
                     isAdmin: isAdmin ? "1" : undefined,
                   },
                 })
               }
-              activeOpacity={0.9}
-            >
-              <View style={styles.cardHeader}>
-                <Text style={styles.groupName}>{item.name}</Text>
-                {isAdmin && (
-                  <TouchableOpacity
-                    style={styles.adminButton}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/group/details",
-                        params: { group: JSON.stringify(item), isAdmin: "1" },
-                      })
-                    }
-                  >
-                    <Text style={styles.adminButtonText}>Admin</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              <View style={styles.infoRow}>
-                <Text style={styles.infoText}>
-                  Membres :{" "}
-                  <Text style={styles.infoValue}>
-                    {item.members?.length ?? 0} / {item.max_members ?? "-"}
-                  </Text>
-                </Text>
-
-                {item.userPlace && (
-                  <Text style={styles.infoText}>
-                    Ta place :{" "}
-                    <Text style={[styles.infoValue, { color: "#8B4513" }]}>
-                      {item.userPlace}
-                    </Text>
-                  </Text>
-                )}
-              </View>
-
-              <View style={styles.rankingBlock}>
-                {item.members
-                  ?.slice(0, 3)
-                  .map((member: any, memberIndex: number) => (
-                    <View
-                      key={member.id || memberIndex}
-                      style={[
-                        styles.participantRow,
-                        memberIndex === 0 ? styles.leaderRow : null,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.rank,
-                          memberIndex === 0 && styles.leaderRank,
-                        ]}
-                      >
-                        {memberIndex + 1}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.participantName,
-                          memberIndex === 0 && styles.leaderName,
-                        ]}
-                      >
-                        {member.name}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.score,
-                          memberIndex === 0 && styles.leaderScore,
-                        ]}
-                      >
-                        {member.totalEarned ?? 0} €
-                      </Text>
-                    </View>
-                  ))}
-              </View>
-            </TouchableOpacity>
-          );
-        }}
-      />
-    </SafeAreaView>
+            />
+          )}
+        />
+      </View>
+    </ThemedView>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#151718",
-    paddingHorizontal: 16,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#8B4513",
-    textAlign: "left",
-  },
-  addButton: {
-    backgroundColor: "#C7A16E",
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 8,
-    elevation: 2,
-  },
-  addButtonText: {
-    color: "#181A1B",
-    fontWeight: "bold",
-    fontSize: 22,
-    lineHeight: 24,
-  },
-  periodTabs: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 12,
-    gap: 8,
-  },
-  periodTab: {
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 16,
-    backgroundColor: "rgba(199,161,110,0.08)",
-    marginHorizontal: 2,
-  },
-  periodTabActive: {
-    backgroundColor: "#C7A16E",
-  },
-  periodTabText: {
-    color: "#C7A16E",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-  periodTabTextActive: {
-    color: "#181A1B",
-  },
-  groupCard: {
-    backgroundColor: "#232325",
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 24,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  groupName: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#C7A16E",
-    flex: 1,
-    textAlign: "left",
-  },
-  infoRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 8,
-    gap: 12,
-  },
-  infoText: {
-    color: "#AAA",
-    fontSize: 14,
-    marginRight: 16,
-    marginBottom: 2,
-  },
-  infoValue: {
-    color: "#ECEDEE",
-    fontWeight: "bold",
-  },
-  rankingBlock: {
-    backgroundColor: "#202123",
-    borderRadius: 10,
-    marginTop: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 0,
-    elevation: 1,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#ECEDEE",
-    marginBottom: 8,
-    textAlign: "left",
-    marginLeft: 4,
-    marginTop: 8,
-  },
-  participantRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 7,
-    borderBottomWidth: 1,
-    borderBottomColor: "#232325",
-    marginHorizontal: 4,
-  },
-  leaderRow: {
-    backgroundColor: "#232325",
-    borderRadius: 6,
-  },
-  rank: {
-    width: 28,
-    fontSize: 16,
-    color: "#C7A16E",
-    fontWeight: "bold",
-    textAlign: "right",
-  },
-  leaderRank: {
-    color: "#FFD700",
-    fontSize: 17,
-  },
-  participantName: {
-    flex: 1,
-    fontSize: 16,
-    color: "#ECEDEE",
-    marginLeft: 8,
-  },
-  leaderName: {
-    color: "#FFD700",
-    fontWeight: "bold",
-    fontSize: 17,
-  },
-  score: {
-    fontSize: 15,
-    color: "#C7A16E",
-    fontWeight: "bold",
-    marginLeft: 8,
-  },
-  leaderScore: {
-    color: "#FFD700",
-    fontSize: 16,
-  },
-  adminButton: {
-    marginLeft: 8,
-    backgroundColor: "#C7A16E",
-    borderRadius: 6,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    alignItems: "center",
-    elevation: 1,
-  },
-  adminButtonText: {
-    color: "#181A1B",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-});
+/**
+ * Génère les styles dépendants du thème et de la marge basse
+ */
+const makeStyles = (colors: any, bottomGutter: number, period: string) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: "transparent",
+      paddingHorizontal: 20,
+      paddingTop: 8,
+    },
+    headerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 12,
+      marginTop: 8,
+    },
+    title: {
+      fontSize: 32,
+      fontWeight: "700",
+      color: colors.groupCardTitle,
+      textAlign: "left",
+      marginTop: 2,
+    },
+    addButton: {
+      backgroundColor: colors.groupCardAdminButton,
+      borderRadius: 20,
+      paddingVertical: 6,
+      paddingHorizontal: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      marginLeft: 8,
+      elevation: 2,
+    },
+    addButtonText: {
+      fontWeight: "bold",
+      fontSize: 22,
+      lineHeight: 24,
+      color: colors.groupCardAdminText,
+    },
+
+    // period tabs
+    periodTabs: {
+      flexDirection: "row",
+      justifyContent: "center",
+      marginBottom: 12,
+      gap: 8,
+    },
+    periodTab: {
+      paddingVertical: 6,
+      paddingHorizontal: 14,
+      borderRadius: 16,
+      marginHorizontal: 2,
+      backgroundColor: colors.periodTabBg,
+    },
+    periodTabActive: {
+      backgroundColor: colors.periodTabActiveBg,
+    },
+    periodTabText: {
+      fontWeight: "700",
+      fontSize: 14,
+      color: colors.periodTabText,
+    },
+    periodTabTextActive: {
+      color: colors.periodTabTextActive,
+    },
+
+    // list
+    list: {
+      flex: 1,
+    },
+    listContent: {
+      paddingBottom: bottomGutter,
+      paddingTop: 8,
+    },
+
+    // loading / empty
+    loadingIndicator: {
+      marginTop: 40,
+    },
+    loadingText: {
+      color: colors.text,
+      textAlign: "center",
+      marginTop: 8,
+    },
+  });

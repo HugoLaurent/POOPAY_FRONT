@@ -5,7 +5,6 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
 export const Colors = {
@@ -17,6 +16,23 @@ export const Colors = {
     tabIconDefault: '#A89B8C',
     tabIconSelected: '#FF914D',
     border: '#E0DAD2', // beige grisé
+    groupCardBg: '#F5F3EF', // fond carte groupe clair
+    groupCardTitle: '#C7A16E',
+    groupCardText: '#4B3F2A',
+    groupCardHighlight: '#FFE066', // jaune doux pour la 1ère place (light)
+    // groupCardLeaderBg: '#FFF6E9', // plus de fond pour la 1ère place (light)
+    groupCardAdminButton: '#C7A16E',
+    groupCardAdminText: '#181A1B',
+    periodTabBg: 'rgba(199,161,110,0.08)',
+    periodTabActiveBg: '#C7A16E',
+    periodTabText: '#C7A16E',
+    periodTabTextActive: '#181A1B',
+    // Styles globaux
+    primary: '#8B4513',
+    onPrimary: '#fff',
+    dangerBg: '#E57373',
+    dangerText: '#fff',
+    groupCardLeaderBg: '#FFF6E9',
   },
   dark: {
     text: '#ECEDEE',
@@ -26,8 +42,54 @@ export const Colors = {
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
     border: '#232526', // ajout pour la navbar dark
+    groupCardBg: '#232325', // fond carte groupe sombre
+    groupCardTitle: '#C7A16E',
+    groupCardText: '#ECEDEE',
+    groupCardHighlight: '#FFE066', // jaune doux pour la 1ère place (dark)
+    // groupCardLeaderBg: '#2A2320', // plus de fond pour la 1ère place (dark)
+    groupCardAdminButton: '#C7A16E',
+    groupCardAdminText: '#181A1B',
+    periodTabBg: 'rgba(199,161,110,0.08)',
+    periodTabActiveBg: '#C7A16E',
+    periodTabText: '#C7A16E',
+    periodTabTextActive: '#181A1B',
+    // Styles globaux
+    primary: '#8B4513 ',
+    onPrimary: '#181A1B',
+    dangerBg: '#B71C1C',
+    dangerText: '#fff',
+    groupCardLeaderBg: '#2A2320',
   },
 };
+
+// Styles globaux réutilisables pour StyleSheet.create, dépendants du thème
+export const getGlobalStyles = (colors: any) => ({
+  buttonPrimary: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center' as const,
+    elevation: 2,
+    paddingHorizontal: 18,
+  },
+  buttonPrimaryText: {
+    color: colors.onPrimary,
+    fontWeight: '700' as const,
+    fontSize: 16,
+  },
+  buttonDanger: {
+    backgroundColor: colors.dangerBg,
+    marginLeft: 12,
+  },
+  buttonDangerText: {
+    color: colors.dangerText,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold' as const,
+    color: colors.text,
+  },
+});
 
 export const Fonts = Platform.select({
   ios: {
