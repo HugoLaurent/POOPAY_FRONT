@@ -26,7 +26,7 @@ export default function GroupRankingBlock({
 
   return (
     <ThemedView style={[styles.statsBlock, styles.statsBlockSpacing, style]}>
-      <View style={{ flex: 1 }}>
+      <View style={styles.leftColumn}>
         <Text style={styles.groupName}>{group.name}</Text>
       </View>
       <View style={styles.rightColumn}>
@@ -96,6 +96,7 @@ const getStyles = (colors: any) =>
       color: colors.textDivers,
       marginLeft: 4,
     },
+    leftColumn: { flex: 1 },
     groupMedal: {
       fontSize: 18,
       marginRight: 4,

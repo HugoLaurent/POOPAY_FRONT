@@ -124,7 +124,7 @@ export default function HomeScreen() {
     <ThemedView style={styles.safeArea}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
@@ -140,7 +140,7 @@ export default function HomeScreen() {
           {last7Days.map((date, idx) => {
             const isActive = idx === selectedDay;
             return (
-              <View key={idx} style={{ flex: 1, alignItems: "center" }}>
+              <View key={idx} style={styles.dayCell}>
                 <ThemedText style={styles.calendarDayLabel}>
                   {daysOfWeek[date.getDay() === 0 ? 6 : date.getDay() - 1]}
                 </ThemedText>
@@ -157,13 +157,7 @@ export default function HomeScreen() {
                   <ThemedText
                     style={[
                       styles.calendarDayText,
-                      {
-                        textAlign: "center",
-                        textAlignVertical: "center",
-                        width: 32,
-                        height: 32,
-                        lineHeight: 32,
-                      },
+                      styles.calendarDayTextInner,
                       isActive
                         ? styles.calendarDayTextActive
                         : styles.calendarDayTextInactive,
@@ -303,6 +297,13 @@ const getStyles = (colors: any) =>
       textAlign: "center",
       backgroundColor: "transparent",
     },
+    calendarDayTextInner: {
+      textAlign: "center",
+      textAlignVertical: "center",
+      width: 32,
+      height: 32,
+      lineHeight: 32,
+    },
     calendarDayTextActive: {
       color: "white",
       fontWeight: "bold",
@@ -399,6 +400,8 @@ const getStyles = (colors: any) =>
       color: colors.primary,
       fontWeight: "normal",
     },
+    contentContainer: { paddingBottom: 32 },
+    dayCell: { flex: 1, alignItems: "center" },
     groupPlace: {
       color: colors.primary,
       fontWeight: "bold",

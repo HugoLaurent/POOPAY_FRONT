@@ -1,40 +1,71 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import type { GroupData } from "@/types/group";
 
 interface GroupCardProps {
-  item: GroupData;
-  userId: string | number;
-  onPress: (item: GroupData, adminName: string, isAdmin: boolean) => void;
+  item?: GroupData | null;
+  userId?: string | number;
+  onPress?: (item: GroupData, adminName: string, isAdmin: boolean) => void;
+  isLoading?: boolean;
 }
 
-const GroupCard: React.FC<GroupCardProps> = ({ item, userId, onPress }) => {
+const GroupCard: React.FC<GroupCardProps> = ({
+  item,
+  userId,
+  onPress,
+  isLoading,
+}) => {
   const router = useRouter();
   const theme = useColorScheme() ?? "light";
   const colors = Colors[theme];
-  const isAdmin = String(item.admin_user_id) === String(userId);
+  const isAdmin = item ? String(item.admin_user_id) === String(userId) : false;
   const adminName =
-    item.members?.find((m: any) => String(m.id) === String(item.admin_user_id))
-      ?.name || "-";
-  const winnerLastMonth = item.winnerLastMonth;
+    item?.members?.find(
+      (m: any) => String(m.id) === String(item?.admin_user_id)
+    )?.name || "-";
+  const winnerLastMonth = item?.winnerLastMonth;
 
   const styles = getStyles(colors);
+
+  // Placeholder card when loading
+  if (isLoading) {
+    return (
+      <View style={styles.groupCard}>
+        <View style={styles.headerRowCustom}>
+          <View style={styles.placeholderLeft}>
+            <View style={styles.placeholderLineLarge} />
+          </View>
+          <View style={styles.headerRight}>
+            <ActivityIndicator size="small" color={colors.groupCardTitle} />
+          </View>
+        </View>
+
+        <View style={styles.placeholderLineSmall} />
+      </View>
+    );
+  }
 
   return (
     <TouchableOpacity
       style={styles.groupCard}
-      onPress={() => onPress(item, adminName, isAdmin)}
+      onPress={() => onPress && item && onPress(item, adminName, isAdmin)}
       activeOpacity={0.9}
     >
       {/* Ligne 1 : Titre + membres/max + bouton admin */}
       <View style={styles.headerRowCustom}>
-        <Text style={styles.groupName}>{item.name}</Text>
+        <Text style={styles.groupName}>{item?.name}</Text>
         <View style={styles.headerRight}>
           <Text style={styles.infoValue}>
-            {item.members?.length ?? 0} / {item.max_members ?? "-"}
+            {item?.members?.length ?? 0} / {item?.max_members ?? "-"}
           </Text>
           {isAdmin && (
             <TouchableOpacity
@@ -62,7 +93,7 @@ const GroupCard: React.FC<GroupCardProps> = ({ item, userId, onPress }) => {
 
       {/* Bloc classement */}
       <View style={styles.rankingBlock}>
-        {item.members?.slice(0, 3).map((member: any, memberIndex: number) => {
+        {item?.members?.slice(0, 3).map((member: any, memberIndex: number) => {
           const isLeader = memberIndex === 0;
           const medalIcons = ["🥇", "🥈", "🥉"];
           const medal = medalIcons[memberIndex] ?? String(memberIndex + 1);
@@ -102,6 +133,20 @@ const getStyles = (colors: any) =>
       alignItems: "center",
       justifyContent: "space-between",
       marginBottom: 2,
+    },
+    placeholderLeft: { flex: 1 },
+    placeholderLineLarge: {
+      height: 22,
+      width: "60%",
+      borderRadius: 6,
+      backgroundColor: colors.groupCardTitle + "33",
+    },
+    placeholderLineSmall: {
+      height: 12,
+      marginTop: 12,
+      width: "40%",
+      borderRadius: 6,
+      backgroundColor: colors.groupCardTitle + "22",
     },
     headerRight: {
       flexDirection: "row",

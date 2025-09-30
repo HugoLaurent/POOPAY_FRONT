@@ -43,10 +43,7 @@ export default function RootLayout() {
         <ThemeProvider
           value={colorScheme === "dark" ? customDarkTheme : customLightTheme}
         >
-          <SafeAreaView
-            style={{ flex: 1, backgroundColor: "#151718" }}
-            edges={["top"]}
-          >
+          <SafeAreaView style={styles.safeArea} edges={["top"]}>
             <RootStack />
             <StatusBar style="auto" />
           </SafeAreaView>
@@ -56,12 +53,17 @@ export default function RootLayout() {
   );
 }
 
+const styles = {
+  safeArea: { flex: 1, backgroundColor: "#151718" },
+  stackContentStyle: { backgroundColor: "#151718" },
+};
+
 function RootStack() {
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: "#151718" }, // Fond sombre par défaut
+        contentStyle: styles.stackContentStyle, // Fond sombre par défaut
         animationDuration: 350, // Durée d'animation globale
       }}
     >

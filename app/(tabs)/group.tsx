@@ -6,7 +6,6 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
 } from "react-native";
 import GroupCard from "@/components/ui/GroupCard";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -63,14 +62,83 @@ export default function GroupScreen() {
   );
 
   if (loading) {
+    // Affiche des placeholders de cartes pendant le chargement
+    const placeholderCount = 4;
+    const placeholders = Array.from({ length: placeholderCount }, (_, i) => ({
+      id: `ph-${i}`,
+    }));
+
     return (
       <ThemedView style={[styles.safeArea, { paddingTop: insets.top }]}>
-        <ActivityIndicator
-          style={styles.loadingIndicator}
-          size="small"
-          color={colors.groupCardTitle}
-        />
-        <Text style={styles.loadingText}>Chargement...</Text>
+        <View style={styles.container}>
+          <View style={styles.headerRow}>
+            <Text style={styles.title}>Mes Groupes</Text>
+            <TouchableOpacity style={styles.addButton} onPress={handleAddGroup}>
+              <Text style={styles.addButtonText}>＋</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.periodTabs}>
+            <TouchableOpacity
+              style={[
+                styles.periodTab,
+                period === "week" ? styles.periodTabActive : null,
+              ]}
+              onPress={() => setPeriod("week")}
+            >
+              <Text
+                style={[
+                  styles.periodTabText,
+                  period === "week" ? styles.periodTabTextActive : null,
+                ]}
+              >
+                Cette semaine
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.periodTab,
+                period === "month" ? styles.periodTabActive : null,
+              ]}
+              onPress={() => setPeriod("month")}
+            >
+              <Text
+                style={[
+                  styles.periodTabText,
+                  period === "month" ? styles.periodTabTextActive : null,
+                ]}
+              >
+                Ce mois-ci
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.periodTab,
+                period === "past" ? styles.periodTabActive : null,
+              ]}
+              onPress={() => setPeriod("past")}
+            >
+              <Text
+                style={[
+                  styles.periodTabText,
+                  period === "past" ? styles.periodTabTextActive : null,
+                ]}
+              >
+                Mois derniers
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            style={styles.list}
+            data={placeholders}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.listContent}
+            renderItem={() => <GroupCard isLoading />}
+          />
+        </View>
       </ThemedView>
     );
   }
@@ -150,7 +218,9 @@ export default function GroupScreen() {
         <FlatList
           style={styles.list}
           data={groups}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) =>
+            item?.id ? item.id.toString() : Math.random().toString()
+          }
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
             <GroupCard
