@@ -97,11 +97,11 @@ export default function LoginScreen() {
             <ThemedView style={styles.inputContainer}>
               <ThemedText style={styles.label}>Email</ThemedText>
               <TextInput
-                style={[styles.input, styles.inputThemed]}
+                style={styles.input}
                 value={email}
                 onChangeText={setEmail}
                 placeholder="ton.email@example.com"
-                placeholderTextColor={colors.text + "80"}
+                placeholderTextColor={colors.inputPlaceholder + "80"}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -111,11 +111,11 @@ export default function LoginScreen() {
             <ThemedView style={styles.inputContainer}>
               <ThemedText style={styles.label}>Mot de passe</ThemedText>
               <TextInput
-                style={[styles.input, styles.inputThemed]}
+                style={styles.input}
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Au moins 6 caractères..."
-                placeholderTextColor={colors.text + "80"}
+                placeholderTextColor={colors.inputPlaceholder + "80"}
                 secureTextEntry
                 autoCapitalize="none"
               />
@@ -186,7 +186,7 @@ function getStyles(colors: any) {
     title: {
       fontSize: 32,
       fontWeight: "bold",
-      color: colors.groupCardTitle,
+      color: colors.title,
       marginBottom: 8,
     },
     subtitle: {
@@ -194,6 +194,7 @@ function getStyles(colors: any) {
       opacity: 0.8,
       textAlign: "center",
       marginHorizontal: 20,
+      color: colors.subtitle,
     },
     form: {
       gap: 20,
@@ -205,7 +206,7 @@ function getStyles(colors: any) {
     label: {
       fontSize: 16,
       fontWeight: "600",
-      color: colors.groupCardTitle,
+      color: colors.smallTitle,
       marginLeft: 4,
     },
     input: {
@@ -214,14 +215,14 @@ function getStyles(colors: any) {
       paddingHorizontal: 16,
       paddingVertical: 14,
       fontSize: 16,
-      color: colors.groupCardTitle,
+      color: colors.inputText,
+      borderColor: colors.inputBorder,
+      backgroundColor: colors.inputBackground,
+      minHeight: 48,
     },
-    inputThemed: {
-      backgroundColor: colors.periodTabBg,
-      borderColor: colors.periodTabBg,
-    },
+
     submitButton: {
-      backgroundColor: colors.groupCardAdminButton,
+      backgroundColor: colors.bgButtonPrimary,
       borderRadius: 12,
       paddingVertical: 16,
       alignItems: "center",
@@ -239,7 +240,7 @@ function getStyles(colors: any) {
       opacity: 0.6,
     },
     submitButtonText: {
-      color: colors.onPrimary,
+      color: colors.textButtonPrimary,
       fontSize: 18,
       fontWeight: "bold",
     },
@@ -248,7 +249,7 @@ function getStyles(colors: any) {
       paddingVertical: 12,
     },
     switchButtonText: {
-      color: colors.groupCardTitle,
+      color: colors.textSwitchLogin,
       fontSize: 14,
       opacity: 0.8,
     },
@@ -260,6 +261,10 @@ function getStyles(colors: any) {
       opacity: 0.6,
       textAlign: "center",
       fontStyle: "italic",
+      color: colors.textInfo,
     },
+    // Il n'est pas possible de styler le placeholder via StyleSheet.
+    // Utilise la prop `placeholderTextColor` sur le composant TextInput :
+    // <TextInput placeholderTextColor={colors.text + "80"} ... />
   });
 }

@@ -13,6 +13,13 @@ import { useLocalSearchParams } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
+// Helpers
+
+const getMedal = (idx: number) => {
+  const medalIcons = ["🥇", "🥈", "🥉"];
+  return medalIcons[idx] ?? String(idx + 1);
+};
+
 export default function GroupDetailsScreen() {
   const params = useLocalSearchParams();
   const groupParam = params.group;
@@ -22,6 +29,7 @@ export default function GroupDetailsScreen() {
 
   const theme = useColorScheme() ?? "light";
   const styles = getStyles(theme);
+  const colors = Colors[theme];
 
   useEffect(() => {
     if (groupParam) {
@@ -57,17 +65,35 @@ export default function GroupDetailsScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.card}>
           <View style={styles.headerRowCustom}>
-            <Text style={styles.groupName}>{group.name}</Text>
-            <View style={styles.headerRight}>
-              <Text style={styles.infoText}>
-                {group.members?.length ?? 0} / {group.max_members ?? "-"}
+            <View style={styles.headerMain}>
+              <Text style={styles.groupName}>{group.name}</Text>
+              <Text style={styles.groupSubtitle}>
+                <Text style={styles.infoValue}>
+                  {group.members?.length ?? 0}
+                </Text>{" "}
+                / {group.max_members ?? "-"} membres
               </Text>
+            </View>
+            <View style={styles.headerRight}>
+              <View
+                style={[
+                  styles.countBadge,
+                  {
+                    backgroundColor:
+                      colors.groupCardAdminButton ?? colors.primary,
+                  },
+                ]}
+              >
+                <Text style={styles.countBadgeText}>
+                  {group.members?.length ?? 0}
+                </Text>
+              </View>
               {isAdmin && (
                 <TouchableOpacity
                   style={styles.adminButton}
                   onPress={handleEditName}
                 >
-                  <Text style={styles.adminButtonText}>Admin</Text>
+                  <Text style={styles.adminButtonText}>Modifier</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -75,7 +101,10 @@ export default function GroupDetailsScreen() {
 
           {group.winnerLastMonth?.name && (
             <View style={styles.winnerRowCustom}>
-              <Text style={styles.winnerLabel}>Gagnant du mois dernier :</Text>
+              <View style={styles.winnerBadge}>
+                <Text style={styles.winnerEmoji}>🏆</Text>
+                <Text style={styles.winnerLabel}>Gagnant du mois dernier</Text>
+              </View>
               <Text style={styles.winnerName}>
                 {group.winnerLastMonth.name}
               </Text>
@@ -97,9 +126,10 @@ export default function GroupDetailsScreen() {
               key={String(member.id) + "-" + idx}
               style={[styles.participantRow, idx === 0 && styles.leaderRow]}
             >
-              <Text style={idx === 0 ? styles.leaderRank : styles.rank}>
-                {idx + 1}
-              </Text>
+              <View style={styles.memberAvatar}>
+                {getInitials(member.name)}
+              </View>
+              <Text style={styles.medal}>{getMedal(idx)}</Text>
               <Text
                 style={idx === 0 ? styles.leaderName : styles.participantName}
               >
@@ -188,9 +218,45 @@ const getStyles = (theme: "light" | "dark") => {
       justifyContent: "space-between",
       marginBottom: 8,
     },
+    avatar: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: colors.groupCardTitle,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 12,
+    },
+    avatarText: {
+      color: colors.background,
+      fontWeight: "700",
+      fontSize: 16,
+    },
+    headerMain: {
+      flex: 1,
+      justifyContent: "center",
+    },
+    groupSubtitle: {
+      color: colors.text,
+      fontSize: 13,
+      marginTop: 2,
+    },
     headerRight: {
       flexDirection: "row",
       alignItems: "center",
+    },
+    countBadge: {
+      minWidth: 36,
+      height: 28,
+      borderRadius: 14,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 8,
+      paddingHorizontal: 8,
+    },
+    countBadgeText: {
+      color: colors.onPrimary || colors.background,
+      fontWeight: "700",
     },
     groupName: {
       fontSize: 24,
@@ -218,6 +284,19 @@ const getStyles = (theme: "light" | "dark") => {
       alignItems: "center",
       marginBottom: 8,
       marginTop: 6,
+    },
+    winnerBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.groupCardLeaderBg,
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      borderRadius: 16,
+      marginRight: 12,
+    },
+    winnerEmoji: {
+      marginRight: 8,
+      fontSize: 16,
     },
     winnerLabel: {
       fontSize: 13,
@@ -266,6 +345,21 @@ const getStyles = (theme: "light" | "dark") => {
       alignItems: "center",
       paddingVertical: 10,
       marginHorizontal: 12,
+    },
+    memberAvatar: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.groupCardTitle,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 8,
+    },
+    medal: {
+      width: 28,
+      textAlign: "center",
+      marginRight: 6,
+      fontSize: 18,
     },
     leaderRow: {
       borderRadius: 8,

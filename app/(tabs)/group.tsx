@@ -200,12 +200,12 @@ const makeStyles = (colors: any, bottomGutter: number, period: string) =>
     title: {
       fontSize: 32,
       fontWeight: "700",
-      color: colors.groupCardTitle,
+      color: colors.primary,
       textAlign: "left",
       marginTop: 2,
     },
     addButton: {
-      backgroundColor: colors.groupCardAdminButton,
+      backgroundColor: colors.primary,
       borderRadius: 20,
       paddingVertical: 6,
       paddingHorizontal: 16,

@@ -3,8 +3,7 @@ import StatsBlock from "@/components/ui/StatsBlock";
 import { useAppData } from "@/contexts/AppContext";
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors } from "@/constants/theme";
+import { useThemeColor } from "@/hooks/use-theme-color";
 import { ThemedView } from "@/components/themed-view";
 
 // --- HELPERS ---
@@ -38,8 +37,8 @@ function getStats(sessionsArr: any[]) {
 
 export default function HomeScreen() {
   const { profile, groups, sessions } = useAppData();
-  const theme = useColorScheme() ?? "light";
-  const colors = Colors[theme];
+  const themedTextColor = useThemeColor({}, "text");
+  const themedSubtitleColor = useThemeColor({}, "text");
   const now = new Date();
 
   // Semaine (lundi 00:00 -> dimanche 23:59:59.999)
@@ -50,19 +49,16 @@ export default function HomeScreen() {
   const endOfWeekSunday = new Date(startOfWeekMonday);
   endOfWeekSunday.setDate(startOfWeekMonday.getDate() + 6);
   endOfWeekSunday.setHours(23, 59, 59, 999);
-
   const weekSessions = sessions.filter((s: { start_time?: string }) => {
     const d = parseSessionDate(s);
     return d && d >= startOfWeekMonday && d <= endOfWeekSunday;
   });
-
   // Mois
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthSessions = sessions.filter((s: { start_time?: string }) => {
     const d = parseSessionDate(s);
     return d && d >= startOfMonth && d <= now;
   });
-
   const weeklyStats = getStats(weekSessions);
   const monthlyStats = getStats(monthSessions);
 
@@ -120,8 +116,6 @@ export default function HomeScreen() {
     }
   };
 
-  const styles = getStyles(theme);
-
   return (
     <ThemedView style={styles.safeArea}>
       <ScrollView
@@ -131,12 +125,12 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={styles.headerSection}>
-          <Text style={styles.welcomeText}>
+          <Text style={[styles.welcomeText, { color: themedTextColor }]}>
             Bienvenue {profile?.username || "utilisateur"} sur
           </Text>
           <Text style={styles.appTitle}>POOPAY</Text>
-          <Text style={styles.subtitle}>
-            L&apos;app la plus fun pour traquer ses cacas ! 🚽
+          <Text style={[styles.subtitle, { color: themedSubtitleColor }]}>
+            L&apos;app la plus fun pour traquer tes cacas ! 🚽
           </Text>
         </View>
 
@@ -162,6 +156,13 @@ export default function HomeScreen() {
                   <Text
                     style={[
                       styles.calendarDayText,
+                      {
+                        textAlign: "center",
+                        textAlignVertical: "center",
+                        width: 32,
+                        height: 32,
+                        lineHeight: 32,
+                      },
                       isActive
                         ? styles.calendarDayTextActive
                         : styles.calendarDayTextInactive,
@@ -175,15 +176,19 @@ export default function HomeScreen() {
           })}
         </View>
 
-        {/* Stats jour sélectionné */}
+        {/* Titre stats jour dynamique */}
         <Text style={styles.statsBlockTitle}>{getDayTitle()}</Text>
+        {/* Stats du jour sélectionné */}
+
         <StatsBlock stats={dayStats} />
 
-        {/* Stats semaine */}
+        {/* Titre stats semaine */}
+
+        {/* Semaine */}
         <Text style={styles.statsBlockTitle}>Cette semaine</Text>
         <StatsBlock stats={weeklyStats} />
 
-        {/* Stats mois */}
+        {/* Mois */}
         <Text style={styles.statsBlockTitle}>Ce mois-ci</Text>
         <StatsBlock
           stats={monthlyStats}
@@ -196,12 +201,10 @@ export default function HomeScreen() {
           <Text style={styles.groupTitle}>Classement de la semaine </Text>
         </View>
 
-        {/* Liste des groupes */}
+        {/* Liste des groupes harmonisée */}
         {groups.map((group, idx) => (
           <GroupRankingBlock
-            key={
-              group.id !== undefined ? String(group.id) : group.name + "-" + idx
-            }
+            key={group.name + idx}
             group={group}
             profile={profile}
           />
@@ -211,103 +214,182 @@ export default function HomeScreen() {
   );
 }
 
-const getStyles = (theme: "light" | "dark") => {
-  const colors = Colors[theme];
-  return StyleSheet.create({
-    safeArea: { flex: 1 },
-    container: {
-      flex: 1,
-      backgroundColor: "transparent",
-      paddingHorizontal: 20,
-      paddingTop: 10,
-    },
-    headerSection: { alignItems: "center", marginBottom: 10 },
-    welcomeText: {
-      fontSize: 18,
-      marginBottom: 2,
-      textAlign: "center",
-      color: colors.text,
-    },
-    appTitle: {
-      fontSize: 32,
-      fontWeight: "bold",
-      marginBottom: 8,
-      textAlign: "center",
-      color: colors.primary,
-    },
-    subtitle: {
-      fontSize: 14,
-      textAlign: "center",
-      marginBottom: 10,
-      color: colors.text,
-      opacity: 0.7,
-    },
-    calendarRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 15,
-      marginTop: 18,
-    },
-    calendarDayLabel: {
-      fontSize: 12,
-      color: colors.text,
-      opacity: 0.7,
-      marginBottom: 2,
-    },
-    calendarDayButton: {
-      borderRadius: 16,
-      paddingVertical: 6,
-      width: 32,
-      height: 32,
-      marginBottom: 2,
-      justifyContent: "center",
-      alignItems: "center",
-      display: "flex",
-      zIndex: 10,
-    },
-    calendarDayButtonInactive: { backgroundColor: `${colors.primary}20` },
-    calendarDayButtonActive: {
-      backgroundColor: colors.primary,
-      borderWidth: 1,
-      borderColor: colors.primary,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-      elevation: 3,
-    },
-    calendarDayText: {
-      fontSize: 18,
-      textAlign: "center",
-      backgroundColor: "transparent",
-    },
-    calendarDayTextActive: { color: colors.onPrimary, fontWeight: "bold" },
-    calendarDayTextInactive: { color: colors.primary, fontWeight: "normal" },
-    statsBlockTitle: {
-      fontSize: 16,
-      fontWeight: "bold",
-      color: colors.primary,
-      marginLeft: 4,
-      marginBottom: 8,
-    },
-    groupTitleSection: {
-      width: "100%",
-      marginVertical: 24,
-      alignItems: "flex-start",
-    },
-    separator: {
-      height: 1,
-      backgroundColor: colors.primary,
-      width: "100%",
-      marginBottom: 8,
-      opacity: 0.2,
-    },
-    groupTitle: {
-      fontWeight: "bold",
-      fontSize: 18,
-      color: colors.primary,
-      marginBottom: 8,
-    },
-  });
-};
+const styles = StyleSheet.create({
+  calendarRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+    marginTop: 18,
+  },
+  calendarDayLabel: {
+    fontSize: 12,
+    color: "#8B4513",
+    opacity: 0.7,
+    marginBottom: 2,
+  },
+  calendarDayButton: {
+    borderRadius: 16,
+    paddingVertical: 6,
+    width: 32,
+    height: 32,
+    marginBottom: 2,
+
+    justifyContent: "center",
+    alignItems: "center",
+    display: "flex",
+    zIndex: 10,
+  },
+  calendarDayButtonInactive: {
+    backgroundColor: "rgba(139,69,19,0.08)",
+  },
+  calendarDayButtonActive: {
+    backgroundColor: "#8B4513",
+    borderWidth: 1,
+    borderColor: "#8B4513",
+    shadowColor: "#8B4513",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  calendarDayText: {
+    fontSize: 18,
+    textAlign: "center",
+    backgroundColor: "transparent",
+  },
+  calendarDayTextActive: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  calendarDayTextInactive: {
+    color: "#8B4513",
+    fontWeight: "normal",
+  },
+  statsBlockTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#8B4513",
+    marginLeft: 4,
+    marginBottom: 8, // Ajoute un espace sous le titre
+  },
+  safeArea: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "transparent",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  headerSection: {
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  welcomeText: {
+    fontSize: 18,
+    marginBottom: 2,
+    textAlign: "center",
+    // couleur gérée dynamiquement par useThemeColor
+  },
+  appTitle: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: "center",
+    color: "#8B4513",
+  },
+  subtitle: {
+    fontSize: 14,
+    opacity: 0.7,
+    textAlign: "center",
+    marginBottom: 10,
+    color: "#ECEDEE",
+  },
+  statsBlock: {
+    backgroundColor: "rgba(139, 69, 19, 0.05)",
+    borderRadius: 16,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(139, 69, 19, 0.1)",
+    padding: 8, // padding réduit
+  },
+  statsBlockSpacing: {
+    marginBottom: 10,
+  },
+  statsItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  statsValue: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#8B4513",
+  },
+  statsLabel: {
+    color: "#ECEDEE",
+    fontSize: 13,
+    opacity: 0.8,
+  },
+  groupTitleSection: {
+    width: "100%",
+    marginVertical: 24,
+    alignItems: "flex-start",
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "#8B4513",
+    width: "100%",
+    marginBottom: 8,
+    opacity: 0.2,
+  },
+  groupTitle: {
+    fontWeight: "bold",
+    fontSize: 18,
+    color: "#8B4513",
+    marginBottom: 8,
+  },
+  groupBlock: {
+    display: "none", // On n'utilise plus ce style, harmonisation faite avec statsBlock
+  },
+  groupBlockHarmonized: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    // même fond, bordure, padding que statsBlock
+  },
+  groupName: {
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "#8B4513",
+    marginLeft: 4,
+  },
+  groupMedal: {
+    fontSize: 18,
+    marginRight: 4,
+  },
+  groupMedalLabel: {
+    fontSize: 14,
+    color: "#8B4513",
+    fontWeight: "bold",
+    marginRight: 8,
+  },
+  groupLeaderName: {
+    fontSize: 14,
+    color: "#8B4513",
+    fontWeight: "normal",
+  },
+  groupPlace: {
+    color: "#8B4513",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  groupLeader: {
+    color: "#ECEDEE",
+    fontSize: 13,
+    opacity: 0.8,
+  },
+});

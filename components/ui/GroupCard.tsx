@@ -64,14 +64,14 @@ const GroupCard: React.FC<GroupCardProps> = ({ item, userId, onPress }) => {
       <View style={styles.rankingBlock}>
         {item.members?.slice(0, 3).map((member: any, memberIndex: number) => {
           const isLeader = memberIndex === 0;
+          const medalIcons = ["🥇", "🥈", "🥉"];
+          const medal = medalIcons[memberIndex] ?? String(memberIndex + 1);
           return (
             <View
               key={member.id || memberIndex}
               style={[styles.participantRow, isLeader && styles.leaderRow]}
             >
-              <Text style={isLeader ? styles.leaderRank : styles.rank}>
-                {memberIndex + 1}
-              </Text>
+              <Text style={styles.medal}>{medal}</Text>
               <Text
                 style={isLeader ? styles.leaderName : styles.participantName}
               >
@@ -151,7 +151,7 @@ const getStyles = (colors: any) =>
     winnerName: {
       fontWeight: "bold",
       fontSize: 14,
-      color: colors.groupCardHighlight,
+      color: "white",
     },
     rankingBlock: {},
     participantRow: {
@@ -171,6 +171,12 @@ const getStyles = (colors: any) =>
       color: colors.groupCardHighlight,
       fontWeight: "bold",
     },
+    medal: {
+      fontSize: 20,
+      marginRight: 8,
+      width: 30,
+      textAlign: 'center',
+    },
     participantName: {
       flex: 1,
       fontSize: 16,
@@ -187,7 +193,7 @@ const getStyles = (colors: any) =>
     score: {
       fontSize: 15,
       fontWeight: "bold",
-      color: colors.groupCardTitle,
+      color: colors.groupCardText,
       marginLeft: 8,
     },
     leaderScore: {

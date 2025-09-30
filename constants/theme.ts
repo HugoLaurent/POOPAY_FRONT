@@ -9,6 +9,25 @@ const tintColorDark = '#fff';
 
 export const Colors = {
   light: {
+
+
+    // Text
+    title: '#C7a16e',
+    subtitle: '#3a342dff',
+    smallTitle: '#C7a16e',
+    // Button
+    bgButtonPrimary: '#C7A16E',
+    textButtonPrimary: '#fff',
+    // INPUT
+    inputBorder: '#E0DAD2',
+    inputBackground: '#f5f3ef52',
+    inputText: '#4B3F2A',
+    inputPlaceholder: '#A89B8C',
+    textInfo: '#11100fff',
+    textSwitchLogin: '#8B4513',
+
+
+
     text: '#4B3F2A', // brun doux
     background: '#E0DAD2', // beige moyen (plus foncé)
     tint: '#FF914D', // orange doux/terracotta
@@ -17,16 +36,15 @@ export const Colors = {
     tabIconSelected: '#FF914D',
     border: '#E0DAD2', // beige grisé
     groupCardBg: '#F5F3EF', // fond carte groupe clair
-    groupCardTitle: '#C7A16E',
+    groupCardTitle: '#8B4513',
     groupCardText: '#4B3F2A',
-    groupCardHighlight: '#FFE066', // jaune doux pour la 1ère place (light)
-    // groupCardLeaderBg: '#FFF6E9', // plus de fond pour la 1ère place (light)
+    groupCardHighlight: '#d8c163ff', // jaune doux pour la 1ère place (light)
     groupCardAdminButton: '#C7A16E',
-    groupCardAdminText: '#181A1B',
+    groupCardAdminText: '#FFFFFF',
     periodTabBg: 'rgba(199,161,110,0.08)',
     periodTabActiveBg: '#C7A16E',
-    periodTabText: '#C7A16E',
-    periodTabTextActive: '#181A1B',
+    periodTabText: '#8B4513',
+    periodTabTextActive: '#FFFFFF',
     // Styles globaux
     primary: '#8B4513',
     onPrimary: '#fff',
@@ -35,7 +53,24 @@ export const Colors = {
     groupCardLeaderBg: '#FFF6E9',
   },
   dark: {
-    text: '#ECEDEE',
+    // Text
+    title: '#C7a16e',
+    subtitle: '#E0DAD2',
+    smallTitle: '#C7a16e',
+    textInfo: '#E0DAD2',
+    textSwitchLogin: '#8B4513',
+    // Button
+    bgButtonPrimary: '#C7A16E',
+    textButtonPrimary: '#000',
+    // INPUT
+    inputBorder: '#5c59543d',
+    inputBackground: '#22211e70',
+    inputText: '#E0DAD2',
+    inputPlaceholder: '#E0DAD2',
+
+
+
+    text: '#8B4513',
     background: '#151718',
     tint: tintColorDark,
     icon: '#9BA1A6',
@@ -43,7 +78,7 @@ export const Colors = {
     tabIconSelected: tintColorDark,
     border: '#232526', // ajout pour la navbar dark
     groupCardBg: '#232325', // fond carte groupe sombre
-    groupCardTitle: '#C7A16E',
+    groupCardTitle: '#8B4513',
     groupCardText: '#ECEDEE',
     groupCardHighlight: '#FFE066', // jaune doux pour la 1ère place (dark)
     // groupCardLeaderBg: '#2A2320', // plus de fond pour la 1ère place (dark)
@@ -51,11 +86,11 @@ export const Colors = {
     groupCardAdminText: '#181A1B',
     periodTabBg: 'rgba(199,161,110,0.08)',
     periodTabActiveBg: '#C7A16E',
-    periodTabText: '#C7A16E',
-    periodTabTextActive: '#181A1B',
+    periodTabText: '#8B4513',
+    periodTabTextActive: '#FFFFFF',
     // Styles globaux
-    primary: '#8B4513 ',
-    onPrimary: '#181A1B',
+    primary: '#8B4513',
+    onPrimary: '#8B4513',
     dangerBg: '#B71C1C',
     dangerText: '#fff',
     groupCardLeaderBg: '#2A2320',
