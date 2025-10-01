@@ -32,9 +32,9 @@ export const Colors = {
     text: '#4B3F2A', // brun doux
     background: '#E0DAD2', // beige moyen (plus foncé)
     tint: '#FF914D', // orange doux/terracotta
-    icon: '#A89B8C', // taupe/gris chaud
+    icon: '#8B4513', // taupe/gris chaud
     tabIconDefault: '#A89B8C',
-    tabIconSelected: '#FF914D',
+    tabIconSelected: '#8B4513',
     border: '#E0DAD2', // beige grisé
     groupCardBg: '#F5F3EF', // fond carte groupe clair
     groupCardTitle: '#8B4513',
@@ -75,7 +75,7 @@ export const Colors = {
     text: '#8B4513',
     background: '#151718',
     tint: tintColorDark,
-    icon: '#9BA1A6',
+    icon: '#8B4513',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
     border: '#232526', // ajout pour la navbar dark

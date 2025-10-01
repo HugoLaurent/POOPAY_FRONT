@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { AppProvider } from "@/contexts/AppContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors } from "@/constants/theme";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -19,13 +20,15 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  // Use app Colors so background matches light/dark theme and avoids flashes
+  const theme = colorScheme === "dark" ? "dark" : "light";
+  const backgroundColor = Colors[theme].background;
 
-  // Thème personnalisé pour éviter le flash blanc
   const customDarkTheme = {
     ...DarkTheme,
     colors: {
       ...DarkTheme.colors,
-      background: "#151718", // Notre couleur de fond sombre
+      background: backgroundColor,
     },
   };
 
@@ -33,7 +36,7 @@ export default function RootLayout() {
     ...DefaultTheme,
     colors: {
       ...DefaultTheme.colors,
-      background: "#151718", // Même couleur pour éviter le flash
+      background: backgroundColor,
     },
   };
 
@@ -43,9 +46,12 @@ export default function RootLayout() {
         <ThemeProvider
           value={colorScheme === "dark" ? customDarkTheme : customLightTheme}
         >
-          <SafeAreaView style={styles.safeArea} edges={["top"]}>
-            <RootStack />
-            <StatusBar style="auto" />
+          <SafeAreaView
+            style={[styles.safeArea, { backgroundColor }]}
+            edges={["top"]}
+          >
+            <RootStack backgroundColor={backgroundColor} />
+            <StatusBar style={theme === "dark" ? "light" : "dark"} />
           </SafeAreaView>
         </ThemeProvider>
       </AppProvider>
@@ -54,16 +60,19 @@ export default function RootLayout() {
 }
 
 const styles = {
-  safeArea: { flex: 1, backgroundColor: "#151718" },
+  safeArea: { flex: 1 },
   stackContentStyle: { backgroundColor: "#151718" },
 };
 
-function RootStack() {
+function RootStack({ backgroundColor }: { backgroundColor?: string }) {
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: styles.stackContentStyle, // Fond sombre par défaut
+        contentStyle: {
+          backgroundColor:
+            backgroundColor ?? styles.stackContentStyle.backgroundColor,
+        }, // use theme bg
         animationDuration: 350, // Durée d'animation globale
       }}
     >
@@ -97,9 +106,7 @@ function RootStack() {
           headerShown: true,
           // On garde la même animation
           animation: "slide_from_right",
-
         }}
-        
       />
       <Stack.Screen
         name="modal"

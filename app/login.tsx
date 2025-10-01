@@ -6,6 +6,7 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -82,7 +83,11 @@ export default function LoginScreen() {
         >
           {/* Header */}
           <ThemedView style={styles.header}>
-            <ThemedText style={styles.logo}>💩</ThemedText>
+            <Image
+              source={require("../assets/images/logoPoopay.png")}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
             <ThemedText style={styles.title}>POOPAY</ThemedText>
             <ThemedText style={styles.subtitle}>
               {isSignupMode
@@ -129,8 +134,8 @@ export default function LoginScreen() {
                 {isLoading
                   ? "⏳ Chargement..."
                   : isSignupMode
-                  ? "🚀 Créer mon compte"
-                  : "💩 Se connecter"}
+                  ? "Créer mon compte"
+                  : "Se connecter"}
               </ThemedText>
             </TouchableOpacity>
 
@@ -180,6 +185,11 @@ function getStyles(colors: any) {
     },
     logo: {
       fontSize: 48,
+      marginBottom: 8,
+    },
+    logoImage: {
+      width: 96,
+      height: 96,
       marginBottom: 8,
     },
     title: {
