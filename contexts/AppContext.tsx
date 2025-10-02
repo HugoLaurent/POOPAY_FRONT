@@ -23,9 +23,14 @@ interface AppData {
 
 interface AppContextType extends AppData {
   initializeAppData: (token: string) => Promise<void>;
+  saveSettings?: (
+    token: string,
+    userId: string,
+    newSettings: any
+  ) => Promise<any>;
 }
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<any>(null);
@@ -42,6 +47,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // getInitData doit retourner { profile, subscription, settings, sessions, groups }
       const profileRes = await authAPI.getProfile(token);
       // Normaliser la réponse qui peut être { data: {...} } ou { user: {...} } ou directement l'objet user
+      console.log("[AppProvider] initializeAppData profileRes:", profileRes);
+
       const profileResData =
         (profileRes && (profileRes as any).data) || profileRes;
       const user =
@@ -49,6 +56,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const userId = user?.id;
 
       const initRes = await authAPI.getInitData(token, userId);
+      console.log("[AppProvider] initializeAppData initRes:", initRes);
       // Normaliser initRes qui peut contenir un wrapper 'data'
       const initResData = (initRes && (initRes as any).data) || initRes || {};
 
@@ -57,16 +65,105 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         initResData.profile || initResData.user || initResData;
       setProfile(resolvedProfile || null);
       setSubscription(initResData.subscription || null);
-      setSettings(initResData.settings || null);
+
+      // Prefer explicit settings from init response, otherwise fallback to
+      // resolvedProfile.preferences (some backends return user preferences
+      // nested under the user object). Normalize common keys to match
+      // what the app expects (notifications, darkMode, language).
+      let finalSettings: any =
+        initResData.settings || resolvedProfile?.preferences || null;
+      if (finalSettings) {
+        const normalized: any = { ...(finalSettings || {}) };
+        // legacy key from backend
+        if (
+          normalized.notification_push !== undefined &&
+          normalized.notifications === undefined
+        ) {
+          normalized.notifications = !!normalized.notification_push;
+        }
+        // theme -> darkMode mapping (e.g. 'dark' | 'light')
+        if (
+          normalized.theme !== undefined &&
+          normalized.darkMode === undefined
+        ) {
+          normalized.darkMode = normalized.theme === "dark";
+        }
+        // ensure language prop exists
+        if (!normalized.language && resolvedProfile?.preferences?.language) {
+          normalized.language = resolvedProfile.preferences.language;
+        }
+        finalSettings = normalized;
+      }
+
+      setSettings(finalSettings || null);
       setSessions(initResData.sessions || []);
       setGroups(initResData.groups || []);
       // Debug logs utiles en dev
-      console.log("[AppProvider] initializeAppData profileRes:", profileRes);
-      console.log("[AppProvider] initializeAppData initRes:", initRes);
     } catch (e) {
       console.error("Erreur chargement données app:", e);
     } finally {
       setIsAppLoading(false);
+    }
+    console.log(settings);
+  };
+
+  const saveSettings = async (
+    token: string,
+    userId: string,
+    newSettings: any
+  ) => {
+    try {
+      console.log(
+        "[AppContext] saveSettings payload:",
+        newSettings,
+        typeof newSettings
+      );
+      setSettings((prev: any) => ({ ...(prev || {}), ...(newSettings || {}) }));
+      // Appel API si token disponible
+      if (token && userId) {
+        console.log(
+          "[AppContext] calling authAPI.updateSettings with (stringified):",
+          JSON.stringify(newSettings)
+        );
+        const res = await authAPI.updateSettings(token, userId, newSettings);
+        // si réponse contient settings mis à jour, on les utilise
+        const updatedRaw = (res && (res as any).data) || res;
+        let normalizedUpdated: any = null;
+        if (updatedRaw) {
+          // si le backend renvoie { preferences: { theme: 'dark', notification_push: true, language: 'fr' } }
+          if (updatedRaw.preferences) {
+            const p = updatedRaw.preferences || {};
+            normalizedUpdated = {
+              darkMode: p.theme === "dark",
+              notifications:
+                p.notification_push !== undefined
+                  ? !!p.notification_push
+                  : p.notifications !== undefined
+                  ? !!p.notifications
+                  : settings?.notifications ?? true,
+              language: p.language || settings?.language || "fr",
+            };
+          } else if (updatedRaw.settings) {
+            normalizedUpdated = updatedRaw.settings;
+          } else {
+            // Already in settings shape
+            normalizedUpdated = updatedRaw;
+          }
+          setSettings((prev: any) => ({
+            ...(prev || {}),
+            ...(normalizedUpdated || {}),
+          }));
+        }
+        console.log(
+          "[AppContext] saveSettings -> normalizedUpdated:",
+          normalizedUpdated
+        );
+        return normalizedUpdated || updatedRaw;
+      }
+      return settings;
+    } catch (e) {
+      console.error("Erreur saveSettings:", e);
+      throw e;
     }
   };
 
@@ -80,6 +177,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         groups,
         isAppLoading,
         initializeAppData,
+        saveSettings,
       }}
     >
       {children}

@@ -132,7 +132,7 @@ export default function HomeScreen() {
           <ThemedText style={styles.appTitle}>{"POOPAY"}</ThemedText>
         </View>
         <ThemedText style={styles.subtitle}>
-          Combien tu gagnes aux toilettes au travail ?
+          Combien tu gagnes aux toilettes auqsd travail ?
         </ThemedText>
 
         {/* Calendrier 7 jours */}
@@ -332,7 +332,7 @@ const getStyles = (colors: any) =>
       borderColor: "rgba(139, 69, 19, 0.1)",
       padding: 6, // padding réduit
     },
-   
+
     statsItem: {
       alignItems: "center",
       flex: 1,
@@ -355,7 +355,7 @@ const getStyles = (colors: any) =>
       marginBottom: 7,
       alignItems: "flex-start",
     },
-  
+
     groupTitle: {
       fontWeight: "bold",
       fontSize: 17,

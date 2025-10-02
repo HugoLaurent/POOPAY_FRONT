@@ -19,7 +19,7 @@ export const getGroupsByUserId = async (
 };
 
 // Détecter l'environnement pour utiliser la bonne URL
-const API_BASE_URL = 'http://192.168.1.10:3333';  // Pour l'émulateur Android
+const API_BASE_URL = 'http://192.168.1.5:3333';  // Pour l'émulateur Android
 // Récupérer toutes les données d'initialisation (profil, abonnement, sessions, groupes, settings...)
 export const getInitData = async (token: string, userId: string) => {
     const response = await fetch(`${API_BASE_URL}/users/${userId}/init`, {
@@ -103,4 +103,33 @@ export const getProfile = async (token: string) => {
     });
 
     return response.json();
+};
+
+// Mettre à jour les préférences / settings utilisateur
+export const updateSettings = async (
+    token: string,
+    userId: string,
+    settings: any
+) => {
+    try {
+        const body = JSON.stringify(settings);
+        console.log('auth.updateSettings -> URL:', `${API_BASE_URL}/users/${userId}/settings`);
+        console.log('auth.updateSettings -> body:', body);
+        const response = await fetch(`${API_BASE_URL}/users/${userId}/settings`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body,
+        });
+
+        console.log('auth.updateSettings -> status:', response.status, 'ok:', response.ok);
+        const data = await response.json();
+        console.log('auth.updateSettings -> response JSON:', data);
+        return data;
+    } catch (error) {
+        console.error('Erreur updateSettings:', error);
+        throw error;
+    }
 };
