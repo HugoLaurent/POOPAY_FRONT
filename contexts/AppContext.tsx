@@ -18,6 +18,7 @@ interface AppData {
   settings: any;
   sessions: Session[];
   groups: GroupData[];
+  rankings?: any;
   isAppLoading: boolean;
 }
 
@@ -38,6 +39,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<any>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [groups, setGroups] = useState<GroupData[]>([]);
+  const [rankings, setRankings] = useState<any>(null);
   const [isAppLoading, setIsAppLoading] = useState(true);
 
   const initializeAppData = async (token: string) => {
@@ -98,6 +100,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSettings(finalSettings || null);
       setSessions(initResData.sessions || []);
       setGroups(initResData.groups || []);
+      // Accept multiple possible keys for ranking payload from backend
+      const rankingPayload =
+        initResData.rankings ||
+        initResData.rankings_by_region ||
+        initResData.rank_by_region ||
+        initResData.rankings_by ||
+        null;
+      setRankings(rankingPayload || null);
       // Debug logs utiles en dev
     } catch (e) {
       console.error("Erreur chargement données app:", e);
@@ -175,6 +185,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         settings,
         sessions,
         groups,
+        rankings,
         isAppLoading,
         initializeAppData,
         saveSettings,
