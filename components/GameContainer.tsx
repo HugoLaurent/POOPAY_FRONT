@@ -10,7 +10,7 @@ export default function GameContainer() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
-
+  const styles = getStyles(colors);
   return (
     <View style={styles.container}>
       {selectedGame ? (
@@ -31,11 +31,19 @@ export default function GameContainer() {
               onPress={() => setSelectedGame("flappy")}
               style={({ pressed }) => [
                 styles.selectorButton,
-                { borderColor: colors.primary },
-                pressed && { opacity: 0.85 },
+                selectedGame === "flappy"
+                  ? styles.selectorButtonActive
+                  : styles.selectorButtonInactive,
+                pressed && styles.buttonPressed,
               ]}
             >
-              <ThemedText style={{ color: colors.primary }}>
+              <ThemedText
+                style={
+                  selectedGame === "flappy"
+                    ? styles.selectorTextActive
+                    : styles.selectorTextInactive
+                }
+              >
                 FlappyTurd
               </ThemedText>
             </Pressable>
@@ -44,11 +52,19 @@ export default function GameContainer() {
               onPress={() => setSelectedGame("dino")}
               style={({ pressed }) => [
                 styles.selectorButton,
-                { borderColor: colors.primary },
-                pressed && { opacity: 0.85 },
+                selectedGame === "dino"
+                  ? styles.selectorButtonActive
+                  : styles.selectorButtonInactive,
+                pressed && styles.buttonPressed,
               ]}
             >
-              <ThemedText style={{ color: colors.primary }}>
+              <ThemedText
+                style={
+                  selectedGame === "dino"
+                    ? styles.selectorTextActive
+                    : styles.selectorTextInactive
+                }
+              >
                 DinoTurd
               </ThemedText>
             </Pressable>
@@ -59,17 +75,29 @@ export default function GameContainer() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    height: Math.round(Dimensions.get("window").height * 0.55),
-  },
-  selectorWrap: { flex: 1, alignItems: "center", justifyContent: "center" },
-  selectorRow: { flexDirection: "row", gap: 12 },
-  selectorButton: {
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-});
+const getStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      width: "100%",
+      height: Math.round(Dimensions.get("window").height * 0.55),
+    },
+    selectorWrap: { flex: 1, alignItems: "center", justifyContent: "center" },
+    selectorRow: { flexDirection: "row", gap: 12 },
+    selectorButton: {
+      paddingHorizontal: 18,
+      paddingVertical: 12,
+      borderRadius: 10,
+      borderWidth: 1,
+    },
+    selectorButtonActive: {
+      backgroundColor: colors.bgButtonPrimary,
+      borderColor: colors.bgButtonPrimary,
+    },
+    selectorButtonInactive: {
+      backgroundColor: colors.bgButtonPrimary,
+      borderColor: colors.bgButtonPrimary,
+    },
+    selectorTextActive: { color: colors.textButtonPrimary },
+    selectorTextInactive: { color: colors.textButtonPrimary },
+    buttonPressed: { opacity: 0.85 },
+  });

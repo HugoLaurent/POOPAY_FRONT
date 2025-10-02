@@ -153,7 +153,7 @@ export default function TimerScreen() {
               onPress={handleSaveSession}
               style={({ pressed }) => [
                 styles.buttonHalf,
-                { backgroundColor: colors.primary },
+                { backgroundColor: colors.bgButtonPrimary },
                 pressed && styles.buttonPressed,
                 { marginRight: 8 },
               ]}
@@ -169,11 +169,14 @@ export default function TimerScreen() {
                 styles.buttonHalf,
                 { backgroundColor: colors.background },
                 pressed && styles.buttonPressed,
-                { borderWidth: 1, borderColor: colors.primary },
+                { borderWidth: 1, borderColor: colors.bgButtonPrimary },
               ]}
             >
               <ThemedText
-                style={[styles.fullWidthButtonText, { color: colors.primary }]}
+                style={[
+                  styles.fullWidthButtonText,
+                  { color: colors.bgButtonPrimary },
+                ]}
               >
                 Annuler la session
               </ThemedText>
@@ -184,7 +187,7 @@ export default function TimerScreen() {
             onPress={toggleStartPause}
             style={({ pressed }) => [
               styles.fullWidthButton,
-              { backgroundColor: colors.primary },
+              { backgroundColor: colors.bgButtonPrimary },
               pressed && styles.buttonPressed,
             ]}
           >

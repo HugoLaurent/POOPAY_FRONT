@@ -270,7 +270,7 @@ const makeStyles = (colors: any, bottomGutter: number, period: string) =>
     title: {
       fontSize: 32,
       fontWeight: "700",
-      color: colors.primary,
+      color: colors.title,
       textAlign: "left",
       marginTop: 2,
     },

@@ -9,12 +9,12 @@ import {
   ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../../contexts/AuthContext";
-import { useAppData } from "../../contexts/AppContext";
-import { Colors } from "../../constants/theme";
-import { useColorScheme } from "../../hooks/use-color-scheme";
-import { ThemedView } from "../../components/themed-view";
-import { ThemedText } from "../../components/themed-text";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAppData } from "@/contexts/AppContext";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { ThemedView } from "@/components/themed-view";
+import { ThemedText } from "@/components/themed-text";
 import { useRouter } from "expo-router";
 
 export default function SettingsScreen() {
@@ -150,7 +150,7 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.headerSection}>
+        <View>
           <ThemedText style={styles.appTitle}>Réglages</ThemedText>
         </View>
 
@@ -177,7 +177,11 @@ export default function SettingsScreen() {
             <Switch
               value={notificationsEnabled}
               onValueChange={handleToggleNotifications}
-              trackColor={{ false: "#ccc", true: colors.primary }}
+              trackColor={{ false: colors.switchLine, true: colors.switchLine }}
+              thumbColor={
+                notificationsEnabled ? colors.switchOn : colors.switchOff
+              }
+              ios_backgroundColor={colors.switchLine}
             />
           </View>
 
@@ -191,49 +195,62 @@ export default function SettingsScreen() {
             <Switch
               value={darkMode}
               onValueChange={handleToggleDarkMode}
-              trackColor={{ false: "#ccc", true: colors.primary }}
+              trackColor={{ false: colors.switchLine, true: colors.switchLine }}
+              thumbColor={darkMode ? colors.switchOn : colors.switchOff}
+              ios_backgroundColor={colors.switchLine}
             />
           </View>
 
-          <View style={styles.sep} />
-
           <ThemedText style={styles.fieldLabel}>Langue</ThemedText>
-          <View style={styles.langRow}>
+          <View
+            style={[
+              styles.twoButtonRowFooter,
+              styles.twoButtonRowNarrow,
+              styles.twoButtonRowFullWidth,
+            ]}
+          >
             <Pressable
-              style={[
-                styles.langBtn,
-                language === "fr" ? styles.langBtnActive : undefined,
-              ]}
               onPress={() => setLanguage("fr")}
+              style={({ pressed }) => [
+                styles.langButton,
+                language === "fr"
+                  ? styles.langBtnActive
+                  : styles.langBtnInactive,
+                pressed && styles.buttonPressed,
+              ]}
             >
               <ThemedText
-                style={[
-                  styles.langText,
-                  language === "fr" ? styles.langTextActive : undefined,
-                ]}
+                style={
+                  language === "fr"
+                    ? [styles.fullWidthButtonText, styles.langTextActive]
+                    : [styles.fullWidthButtonText, styles.langTextInactive]
+                }
               >
                 Français
               </ThemedText>
             </Pressable>
+
             <Pressable
-              style={[
-                styles.langBtn,
-                language === "en" ? styles.langBtnActive : undefined,
-              ]}
               onPress={() => setLanguage("en")}
+              style={({ pressed }) => [
+                styles.langButton,
+                language === "en"
+                  ? styles.langBtnActive
+                  : styles.langBtnInactive,
+                pressed && styles.buttonPressed,
+              ]}
             >
               <ThemedText
-                style={[
-                  styles.langText,
-                  language === "en" ? styles.langTextActive : undefined,
-                ]}
+                style={
+                  language === "en"
+                    ? [styles.fullWidthButtonText, styles.langTextActive]
+                    : [styles.fullWidthButtonText, styles.langTextInactive]
+                }
               >
                 English
               </ThemedText>
             </Pressable>
           </View>
-
-          <View style={styles.sep} />
 
           <View style={styles.moreSection}>
             <ThemedText style={styles.moreTitle}>
@@ -288,23 +305,46 @@ export default function SettingsScreen() {
         edges={["bottom"]}
         style={[styles.footer, styles.footerSafeArea]}
       >
-        <Pressable
-          onPress={handleSave}
-          style={[
-            styles.primaryButton,
-            styles.footerPrimary,
-            saving ? styles.disabledBtn : undefined,
-          ]}
-          disabled={saving}
-        >
-          <ThemedText style={styles.primaryButtonText}>
-            {saving ? "Enregistrement..." : "Sauvegarder"}
-          </ThemedText>
-        </Pressable>
+        <View style={styles.twoButtonRowFooter}>
+          <Pressable
+            onPress={handleSave}
+            disabled={saving}
+            style={({ pressed }) => [
+              styles.buttonHalf,
+              { backgroundColor: colors.bgButtonPrimary },
+              pressed && styles.buttonPressed,
+              { marginRight: 8 },
+            ]}
+          >
+            <ThemedText
+              style={[
+                styles.fullWidthButtonText,
+                { color: colors.textButtonPrimary },
+              ]}
+            >
+              {saving ? "Enregistrement..." : "Sauvegarder"}
+            </ThemedText>
+          </Pressable>
 
-        <Pressable onPress={handleLogout} style={styles.footerLogout}>
-          <ThemedText style={styles.logoutText}>Se déconnecter</ThemedText>
-        </Pressable>
+          <Pressable
+            onPress={handleLogout}
+            style={({ pressed }) => [
+              styles.buttonHalf,
+              { backgroundColor: colors.background },
+              pressed && styles.buttonPressed,
+              { borderWidth: 1, borderColor: colors.bgButtonPrimary },
+            ]}
+          >
+            <ThemedText
+              style={[
+                styles.fullWidthButtonText,
+                { color: colors.bgButtonPrimary },
+              ]}
+            >
+              Se déconnecter
+            </ThemedText>
+          </Pressable>
+        </View>
       </SafeAreaView>
     </ThemedView>
   );
@@ -324,10 +364,6 @@ const getStyles = (colors: any) =>
     contentContainer: {
       paddingHorizontal: 20,
       paddingVertical: 20,
-    },
-
-    headerSection: {
-      alignItems: "center",
     },
 
     appTitle: {
@@ -361,15 +397,14 @@ const getStyles = (colors: any) =>
     },
     hintSmall: {
       fontSize: 12,
-      color: "#666",
+      color: colors.textDivers,
     },
     sep: {
       height: 12,
     },
     moreSection: {
       marginTop: 12,
-      borderTopWidth: 1,
-      borderTopColor: "#eee",
+
       paddingTop: 12,
     },
     moreTitle: {
@@ -382,7 +417,7 @@ const getStyles = (colors: any) =>
     },
     moreItemText: {
       fontSize: 15,
-      color: colors.primary,
+      color: colors.textDivers,
     },
     toggleRow: {
       flexDirection: "row",
@@ -404,27 +439,6 @@ const getStyles = (colors: any) =>
       backgroundColor: colors.inputBackground,
       borderColor: colors.inputBorder,
       color: colors.inputText,
-    },
-
-    langRow: {
-      flexDirection: "row",
-      gap: 8,
-    },
-    langBtn: {
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 8,
-      backgroundColor: "#f5f5f5",
-      marginRight: 8,
-    },
-    langBtnActive: {
-      backgroundColor: colors.bgButtonPrimary,
-    },
-    langText: {
-      color: "#111",
-    },
-    langTextActive: {
-      color: colors.onPrimary,
     },
 
     saveBtn: {
@@ -483,5 +497,44 @@ const getStyles = (colors: any) =>
     footerLogout: {
       paddingHorizontal: 8,
       paddingVertical: 8,
+    },
+    twoButtonRowFooter: {
+      width: "100%",
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+    },
+    buttonHalf: {
+      flex: 1,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: "center",
+    },
+    buttonPressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
+    fullWidthButtonText: { color: "#fff", fontWeight: "700", fontSize: 18 },
+    twoButtonRowNarrow: {
+      marginTop: 8,
+    },
+    twoButtonRowFullWidth: {
+      justifyContent: "space-between",
+      width: "100%",
+    },
+    langBtnActive: {
+      backgroundColor: colors.bgButtonPrimary,
+      paddingHorizontal: 0,
+    },
+    langBtnInactive: {
+      borderWidth: 1,
+      borderColor: colors.bgButtonPrimary,
+      paddingHorizontal: 0,
+    },
+    langTextActive: { color: colors.textButtonPrimary },
+    langTextInactive: { color: colors.bgButtonPrimary },
+    langButton: {
+      width: "48%",
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
     },
   });

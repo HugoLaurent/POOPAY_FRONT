@@ -47,6 +47,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 999,
+    
   },
   button: {
     width: 56,
@@ -58,6 +59,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
+    
   },
   buttonPressed: {
     opacity: 0.85,

@@ -7,99 +7,131 @@ import { Platform } from 'react-native';
 
 const tintColorDark = '#fff';
 
-export const Colors = {
-  light: {
+// Palette centrale pour éviter les duplications et faciliter les ajustements
+const PALETTE = {
+  brandDark: '#8B4513', // couleur principale (brun/taupe)
+  brandLight: '#C7A16E', // couleur secondaire / accent (beige/or)
+  neutralLight: '#E0DAD2',
+  neutralMed: '#A89B8C',
+  neutralDark: '#4B3F2A',
+  neutralLighter: '#F5F3EF',
 
 
-    // Text
-    title: '#8B4513',
-    subtitle: '#3a342dff',
-    smallTitle: '#C7a16e',
-    textDivers: '#C7A16E',
-    // Button
-    bgButtonPrimary: '#C7A16E',
-    textButtonPrimary: '#fff',
-    // INPUT
-    inputBorder: '#E0DAD2',
-    inputBackground: '#f5f3ef52',
-    inputText: '#4B3F2A',
-    inputPlaceholder: '#A89B8C',
-    textInfo: '#11100fff',
-    textSwitchLogin: '#8B4513',
-
-
-
-    text: '#4B3F2A', // brun doux
-    background: '#E0DAD2', // beige moyen (plus foncé)
-    tint: '#FF914D', // orange doux/terracotta
-    icon: '#8B4513', // taupe/gris chaud
-    tabIconDefault: '#A89B8C',
-    tabIconSelected: '#8B4513',
-    border: '#E0DAD2', // beige grisé
-    groupCardBg: '#F5F3EF', // fond carte groupe clair
-    groupCardTitle: '#8B4513',
-    groupCardText: '#4B3F2A',
-    groupCardHighlight: '#d8c163ff', // jaune doux pour la 1ère place (light)
-    groupCardAdminButton: '#C7A16E',
-    groupCardAdminText: '#FFFFFF',
-    periodTabBg: 'rgba(199,161,110,0.08)',
-    periodTabActiveBg: '#C7A16E',
-    periodTabText: '#8B4513',
-    periodTabTextActive: '#FFFFFF',
-    // Styles globaux
-    primary: '#8B4513',
-    onPrimary: '#fff',
-    dangerBg: '#E57373',
-    dangerText: '#fff',
-    groupCardLeaderBg: '#FFF6E9',
-  },
-  dark: {
-    // Text
-    title: '#8B4513',
-    subtitle: '#E0DAD2',
-    smallTitle: '#C7a16e',
-    textDivers: '#C7A16E',
-    textInfo: '#E0DAD2',
-    textSwitchLogin: '#8B4513',
-    // Button
-    bgButtonPrimary: '#C7A16E',
-    textButtonPrimary: '#fff',
-    // INPUT
-    inputBorder: '#5c59543d',
-    inputBackground: '#22211e70',
-    inputText: '#E0DAD2',
-    inputPlaceholder: '#E0DAD2',
-
-
-
-    text: '#8B4513',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#8B4513',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-    border: '#232526', // ajout pour la navbar dark
-    groupCardBg: '#232325', // fond carte groupe sombre
-    groupCardTitle: '#8B4513',
-    groupCardText: '#ECEDEE',
-    groupCardHighlight: '#FFE066', // jaune doux pour la 1ère place (dark)
-    // groupCardLeaderBg: '#2A2320', // plus de fond pour la 1ère place (dark)
-    groupCardAdminButton: '#C7A16E',
-    groupCardAdminText: '#181A1B',
-    periodTabBg: 'rgba(199,161,110,0.08)',
-    periodTabActiveBg: '#C7A16E',
-    periodTabText: '#8B4513',
-    periodTabTextActive: '#FFFFFF',
-    // Styles globaux
-    primary: '#8B4513',
-    onPrimary: '#8B4513',
-    dangerBg: '#B71C1C',
-    dangerText: '#fff',
-    groupCardLeaderBg: '#2A2320',
-  },
+  white: '#FFFFFF',
+  black: '#000000',
+  tint: '#FF914D', // accent vibrant
+  groupHighlightLight: '#d8c163ff',
+  groupHighlightDark: '#FFE066',
 };
 
-// Styles globaux réutilisables pour StyleSheet.create, dépendants du thème
+type ThemeColors = { [key: string]: string };
+
+const makeLightTheme = (p: typeof PALETTE): ThemeColors => ({
+  // Text
+  title: p.brandDark,
+  subtitle: '#3a342dff',
+  smallTitle: p.brandLight,
+  textDivers: p.brandLight,
+  text: p.brandDark,
+  textInfo: '#11100fff',
+  textSwitchLogin: p.brandDark,
+
+  // Button
+  bgButtonPrimary: p.brandLight,
+  textButtonPrimary: p.white,
+  // semantic primary color (kept for backwards compatibility)
+  primary: p.brandLight,
+  onPrimary: p.white,
+
+  // INPUT
+  inputBorder: p.neutralLight,
+  inputBackground: 'rgba(245,243,239,0.32)',
+  inputText: p.neutralDark,
+  inputPlaceholder: p.neutralMed,
+
+  // App chrome
+  background: p.neutralLight,
+  tint: p.tint,
+  icon: p.brandDark,
+  tabIconDefault: p.neutralMed,
+  tabIconSelected: p.brandDark,
+  border: p.neutralLight,
+
+  // Group card
+  groupCardBg: '#F5F3EF',
+  groupCardTitle: p.brandDark,
+  groupCardText: p.neutralDark,
+  groupCardHighlight: p.groupHighlightLight,
+  groupCardAdminButton: p.brandLight,
+  groupCardAdminText: p.white,
+  groupCardLeaderBg: '#FFF6E9',
+  // switch color alias (used for active switch thumb/track)
+  // switch color alias (used for active switch thumb/track)
+  // track (line) will be pink, thumb ON blue, thumb OFF yellow
+  switchOn: p.brandDark,
+  switchOff: p.neutralLighter,
+  switchLine: p.neutralLight,
+
+
+
+
+});
+
+const makeDarkTheme = (p: typeof PALETTE): ThemeColors => ({
+  // Text
+  title: p.brandDark,
+  subtitle: p.neutralLight,
+  smallTitle: p.brandLight,
+  textDivers: p.brandLight,
+  text: p.brandDark,
+  textInfo: p.neutralLight,
+  textSwitchLogin: p.brandDark,
+
+  // Button
+  bgButtonPrimary: p.brandLight,
+  textButtonPrimary: p.white,
+  // semantic primary color (kept for backwards compatibility)
+  primary: p.brandLight,
+  onPrimary: p.white,
+
+  // INPUT
+  inputBorder: '#5c59543d',
+  inputBackground: '#22211e70',
+  inputText: p.neutralLight,
+  inputPlaceholder: p.neutralLight,
+
+  // App chrome
+  background: '#151718',
+  tint: tintColorDark,
+  icon: p.brandDark,
+  tabIconDefault: '#9BA1A6',
+  tabIconSelected: tintColorDark,
+  border: '#232526',
+
+  // Group card
+  groupCardBg: '#232325',
+  groupCardTitle: p.brandDark,
+  groupCardText: '#ECEDEE',
+  groupCardHighlight: p.groupHighlightDark,
+  groupCardAdminButton: p.brandLight,
+  groupCardAdminText: '#181A1B',
+  groupCardLeaderBg: '#2A2320',
+  // switch color alias (used for active switch thumb/track)
+  // switch color alias (used for active switch thumb/track)
+  // track (line) will be pink, thumb ON blue, thumb OFF yellow
+  switchOn: '#86674aff',
+  switchOff: p.brandLight,
+  switchLine: '#ebebeb33',
+
+
+
+
+});
+
+export const Colors = {
+  light: makeLightTheme(PALETTE),
+  dark: makeDarkTheme(PALETTE),
+};
 export const getGlobalStyles = (colors: any) => ({
   buttonPrimary: {
     backgroundColor: colors.primary,
