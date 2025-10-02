@@ -1,12 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, ReactNode, useContext, useState } from "react";
 import { router } from "expo-router";
-import * as authAPI from "../apiService/auth";
+import * as api from "../apiService";
 
 interface User {
   id: string;
   email: string;
   username: string;
+  // champs optionnels renvoyés par l'API
+  department_code?: string;
+  category_id?: string | number;
 }
 
 interface AuthContextType {
@@ -60,7 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       console.log("🔐 AuthContext: Début du login");
-      const response = await authAPI.login(email, password);
+      const response = await api.login(email, password);
       console.log("🔐 AuthContext: Réponse reçue:", response);
 
       // Vérification basique sur la présence du token et de l'utilisateur
@@ -86,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signup = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await authAPI.signup(email, password);
+      const response = await api.signup(email, password);
 
       if (response.status === "success" && response.data?.access_token) {
         // Stocker le token
@@ -113,7 +116,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const tokenValue = await AsyncStorage.getItem("access_token");
       if (tokenValue) {
-        await authAPI.logout(tokenValue);
+        await api.logout(tokenValue);
       }
     } catch (error) {
       console.error("Erreur de déconnexion:", error);
@@ -132,7 +135,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (tokenValue && userData) {
         // Vérifier si le token est encore valide
-        const response = await authAPI.getProfile(tokenValue);
+        const response = await api.getProfile(tokenValue);
 
         if (response.status === "success" && response.data) {
           const user = JSON.parse(userData);

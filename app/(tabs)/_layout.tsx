@@ -23,6 +23,7 @@ export default function TabLayout() {
             borderTopColor: Colors[colorScheme ?? "light"].border,
             height: 72,
             paddingBottom: 16,
+            paddingHorizontal: 2,
           },
           headerShown: false,
           tabBarButton: HapticTab,
@@ -44,15 +45,15 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="explore"
+          name="ranking"
           options={{
-            title: "Fonctionnalités",
-            tabBarLabel: "Fonctionnalités",
+            title: "Classements",
+            tabBarLabel: "Classements",
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="star.fill" color={color} />
             ),
             // Espace augmenté pour laisser la place au bouton central
-            tabBarItemStyle: { marginRight: 36 },
+            tabBarItemStyle: { marginRight: 56 },
           }}
         />
         {/* Placeholder screen to reserve center space for the floating timer button */}

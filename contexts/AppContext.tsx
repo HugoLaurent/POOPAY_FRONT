@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import * as authAPI from "../apiService/auth";
+import * as api from "../apiService";
 import { GroupData } from "../types/group";
 
 interface Session {
@@ -47,7 +47,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       // Un seul appel pour tout récupérer
       // getInitData doit retourner { profile, subscription, settings, sessions, groups }
-      const profileRes = await authAPI.getProfile(token);
+      const profileRes = await api.getProfile(token);
       // Normaliser la réponse qui peut être { data: {...} } ou { user: {...} } ou directement l'objet user
       console.log("[AppProvider] initializeAppData profileRes:", profileRes);
 
@@ -57,8 +57,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         (profileResData && (profileResData as any).user) || profileResData;
       const userId = user?.id;
 
-      const initRes = await authAPI.getInitData(token, userId);
-      console.log("[AppProvider] initializeAppData initRes:", initRes);
+      const initRes = await api.getInitData(token, userId);
+
       // Normaliser initRes qui peut contenir un wrapper 'data'
       const initResData = (initRes && (initRes as any).data) || initRes || {};
 
@@ -135,7 +135,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           "[AppContext] calling authAPI.updateSettings with (stringified):",
           JSON.stringify(newSettings)
         );
-        const res = await authAPI.updateSettings(token, userId, newSettings);
+        const res = await api.updateSettings(token, userId, newSettings);
         // si réponse contient settings mis à jour, on les utilise
         const updatedRaw = (res && (res as any).data) || res;
         let normalizedUpdated: any = null;

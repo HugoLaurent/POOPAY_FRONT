@@ -14,7 +14,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useRouter } from "expo-router";
-import { getGroupsByUserId } from "@/apiService/auth";
+import * as api from "../../apiService";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function GroupScreen() {
@@ -46,7 +46,7 @@ export default function GroupScreen() {
     if (!user || !token) return;
     setLoading(true);
     try {
-      const response = await getGroupsByUserId(token, user.id, period);
+      const response = await api.getGroupsByUserId(token, user.id, period);
       setGroups(response.groups || []);
     } catch {
       setGroups([]);
