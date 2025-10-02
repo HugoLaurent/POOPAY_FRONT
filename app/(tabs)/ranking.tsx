@@ -33,7 +33,8 @@ export default function ExploreScreen() {
           mode: remoteMode,
           filter: remoteFilter,
         });
-        setTopUsers(result.rankings);
+        // Normaliser la réponse pour toujours stocker un tableau
+        setTopUsers(Array.isArray(result?.rankings) ? result.rankings : []);
         console.log(result.rankings);
       } catch {
         // ignore pour l'instant ; log si tu veux debug
@@ -70,28 +71,31 @@ export default function ExploreScreen() {
         />
 
         <ThemedView style={styles.sectionList}>
-          {topUsers.length === 0 ? (
-            <ThemedText style={styles.noData}>
-              Aucun utilisateur pour ce filtre.
-            </ThemedText>
-          ) : (
-            topUsers.map((u: any, idx: number) => (
-              <ThemedView
-                key={(u.id ?? idx) + "-" + idx}
-                style={styles.userRow}
-              >
-                <ThemedText style={styles.userRank}>{idx + 1}.</ThemedText>
-                <ThemedText style={styles.userName}>
-                  {u.username ?? u.name ?? "—"}
-                </ThemedText>
-                <ThemedText style={styles.userScore}>
-                  {typeof u.totalEarned === "number" && u.totalEarned > 0
-                    ? `${u.totalEarned}€`
-                    : `Présent·e ${u.occurrences ?? 0}×`}
-                </ThemedText>
-              </ThemedView>
-            ))
-          )}
+          {(() => {
+            const users = Array.isArray(topUsers) ? topUsers : [];
+            return users.length === 0 ? (
+              <ThemedText style={styles.noData}>
+                Aucun utilisateur pour ce filtre.
+              </ThemedText>
+            ) : (
+              users.map((u: any, idx: number) => (
+                <ThemedView
+                  key={(u.id ?? idx) + "-" + idx}
+                  style={styles.userRow}
+                >
+                  <ThemedText style={styles.userRank}>{idx + 1}.</ThemedText>
+                  <ThemedText style={styles.userName}>
+                    {u.username ?? u.name ?? "—"}
+                  </ThemedText>
+                  <ThemedText style={styles.userScore}>
+                    {typeof u.totalEarned === "number" && u.totalEarned > 0
+                      ? `${u.totalEarned}€`
+                      : `Présent·e ${u.occurrences ?? 0}×`}
+                  </ThemedText>
+                </ThemedView>
+              ))
+            );
+          })()}
         </ThemedView>
       </ScrollView>
     </SafeAreaView>
@@ -132,7 +136,11 @@ const getStyles = (colors: any) =>
       paddingHorizontal: 16,
       marginTop: 12,
     },
-    modeButton: { paddingVertical: 12, paddingHorizontal: 16, borderRadius: 10 },
+    modeButton: {
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 10,
+    },
     modeButtonActive: { backgroundColor: colors.bgButtonPrimary },
     modeButtonInactive: { backgroundColor: "rgba(139,69,19,0.06)" },
     modeTextActive: { color: "white", fontWeight: "700" },

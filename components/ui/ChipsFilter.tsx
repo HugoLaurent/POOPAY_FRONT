@@ -12,6 +12,8 @@ type Props = {
   styles: any;
 };
 
+console.log(process.env.EXPO_PUBLIC_API_URL_LOCAL);
+
 /**
  * ChipsFilter: encapsule les deux modes (region / category) et la liste de chips.
  * Le style utilisé est fourni par le parent via `styles` (afin de garantir
