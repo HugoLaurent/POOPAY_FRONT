@@ -16,6 +16,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { useRouter } from "expo-router";
+import * as api from "../../apiService";
 
 export default function SettingsScreen() {
   const { user, token, logout } = useAuth();
@@ -87,11 +88,17 @@ export default function SettingsScreen() {
   };
 
   const handleExportData = async () => {
-    // Placeholder: implémenter export réel côté serveur
-    Alert.alert(
-      "Export",
-      "Fonction d'export des données demandée (placeholder)."
-    );
+    if (!canSave) {
+      Alert.alert("Non connecté", "Vous devez être connecté pour exporter.");
+      return;
+    }
+    try {
+      const res = await api.getAllData(token as string, user!.id);
+      Alert.alert("Export des données", JSON.stringify(res, null, 2));
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Erreur", "Impossible d'exporter les données.");
+    }
   };
 
   const handleClearCache = async () => {
@@ -367,9 +374,10 @@ const getStyles = (colors: any) =>
     },
 
     appTitle: {
-      fontSize: 28,
-      fontWeight: "bold",
+      fontSize: 32,
+      fontWeight: "700",
       color: colors.title,
+      marginTop: 2,
       marginBottom: 10,
       lineHeight: 34,
     },

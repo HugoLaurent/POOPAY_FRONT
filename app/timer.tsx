@@ -1,18 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, StyleSheet, Pressable, Dimensions } from "react-native";
 import { ThemedText } from "@/components/themed-text";
-import { useNavigation } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { ThemedView } from "@/components/themed-view";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 // IconSymbol removed — not used in this screen
 import { useAppData } from "@/contexts/AppContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { createSession } from "../apiService";
 import GroupDetailsHeader from "@/components/GroupDetailsHeader";
 import GameContainer from "@/components/GameContainer";
 
 export default function TimerScreen() {
   // navigation is used to set a custom native header like GroupDetails
   const navigation = useNavigation();
+  const router = useRouter();
   // safe area insets could be used here, but we'll keep a small absolute offset
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
@@ -21,6 +24,11 @@ export default function TimerScreen() {
   const DEFAULT_SECONDS = 0;
 
   const { profile } = useAppData();
+  const { initializeAppData } = useAppData();
+  const { token } = useAuth();
+
+  // Track ISO start timestamp when timer is started
+  const [startIso, setStartIso] = useState<string | null>(null);
 
   const [secondsElapsed, setSecondsElapsed] = useState(DEFAULT_SECONDS);
   const [running, setRunning] = useState(false);
@@ -55,6 +63,7 @@ export default function TimerScreen() {
       if (next) {
         // starting a new run: clear elapsed and hide the save button
         setSecondsElapsed(0);
+        setStartIso(new Date().toISOString());
         setShowSaveButton(false);
       } else {
         // stopping the run: show the "Enregistrer la session" button
@@ -65,12 +74,59 @@ export default function TimerScreen() {
   }
 
   function handleSaveSession() {
-    // NOTE: per your previous instruction we won't persist sessions now.
-    // This button clears the UI and hides itself. If you want persistence,
-    // I can hook this to the backend or AsyncStorage.
-    setShowSaveButton(false);
-    setSecondsElapsed(0);
-    setRunning(false);
+    (async () => {
+      setShowSaveButton(false);
+
+      // Ensure we have a start time and token
+      const start = startIso
+        ? new Date(startIso)
+        : new Date(Date.now() - secondsElapsed * 1000);
+      const end = new Date();
+
+      const durationSeconds = Math.max(
+        0,
+        Math.round((end.getTime() - start.getTime()) / 1000)
+      );
+
+      // amount earned based on profile hourly_rate
+      const hourly = parseFloat(profile?.hourly_rate ?? 0) || 0;
+      const amountEarned = Number(
+        ((secondsElapsed / 3600) * hourly).toFixed(2)
+      );
+
+      // Optimistic UI: reset immediately
+      setSecondsElapsed(0);
+      setRunning(false);
+      setStartIso(null);
+
+      try {
+        if (!token || !profile?.id) {
+          console.warn(
+            "No token or profile.id available, skipping remote save"
+          );
+          return;
+        }
+
+        const payload = {
+          start_time: start.toISOString(),
+          end_time: end.toISOString(),
+          amount_earned: amountEarned,
+          duration_seconds: durationSeconds,
+          status: "completed",
+        };
+
+        await createSession(token, profile.id, payload as any);
+
+        // Refresh app data so sessions/groups/etc. reflect the newly created session
+
+        await initializeAppData(token);
+
+        router.replace("/(tabs)");
+      } catch (e) {
+        console.error("Failed to create session remotely:", e);
+        // Optionally: show a toast or revert optimistic UI
+      }
+    })();
   }
 
   function handleCancelSession() {
@@ -80,7 +136,6 @@ export default function TimerScreen() {
     setRunning(false);
   }
 
-  // resetTimer removed; stopping/starting handled by toggleStartPause
 
   function formatTime(sec: number) {
     const m = Math.floor(sec / 60)

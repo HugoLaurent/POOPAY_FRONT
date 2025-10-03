@@ -17,3 +17,21 @@ export const getProfile = async (token: string) => {
     return response.json();
 };
 
+export const getAllData = async (token: string, userId: string) => {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}/getAllData`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    if (!response.ok) {
+        const text = await response.text().catch(() => null);
+        throw new Error(`Failed to getAllData: ${response.status} ${text || ''}`);
+    }
+    try {
+        return await response.json();
+    } catch {
+        return null;
+    }
+};
+

@@ -8,7 +8,7 @@ interface Session {
   start_date?: string;
   start_time?: string;
   amount_earned?: number;
-  duration_minutes?: number;
+  duration_seconds?: number;
   // autres infos session
 }
 
@@ -29,6 +29,7 @@ interface AppContextType extends AppData {
     userId: string,
     newSettings: any
   ) => Promise<any>;
+  deleteSession?: (sessionId: string, token?: string) => Promise<void>;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -177,6 +178,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const deleteSession = async (sessionId: string, token?: string) => {
+    // Keep a snapshot for potential rollback
+    const previous = sessions;
+    try {
+      // Check ownership locally if possible (session may contain user_id)
+      const found = sessions.find((s) => s.id === sessionId) as any;
+      if (
+        found &&
+        found.user_id &&
+        profile &&
+        profile.id &&
+        found.user_id !== profile.id
+      ) {
+        throw new Error(
+          "Vous n'avez pas la permission de supprimer cette session."
+        );
+      }
+
+      // Optimistic local removal
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+
+      // If API provides deleteSession, call it (best-effort)
+      if ((api as any).deleteSession && token) {
+        try {
+          // Pass profile id to help backend validate ownership when possible
+          await (api as any).deleteSession(token, sessionId, profile?.id);
+        } catch (e) {
+          console.warn("deleteSession API failed, reverting local state", e);
+          // rollback to previous state
+          setSessions(previous);
+          throw e;
+        }
+      }
+    } catch (e) {
+      console.error("Erreur deleteSession:", e);
+      throw e;
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -189,6 +229,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         isAppLoading,
         initializeAppData,
         saveSettings,
+        deleteSession,
       }}
     >
       {children}

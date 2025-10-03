@@ -18,7 +18,7 @@ function getStats(sessionsArr: any[]) {
   let amount = 0;
   let time = 0;
   sessionsArr.forEach(
-    (s: { amount_earned?: string | number; duration_minutes?: number }) => {
+    (s: { amount_earned?: string | number; duration_seconds?: number }) => {
       let earned = 0;
       if (typeof s.amount_earned === "string") {
         earned = parseFloat(s.amount_earned);
@@ -27,7 +27,7 @@ function getStats(sessionsArr: any[]) {
       }
       if (isNaN(earned)) earned = 0;
       amount += earned;
-      time += s.duration_minutes ? s.duration_minutes / 60 : 0;
+      time += s.duration_seconds ? (s.duration_seconds || 0) / 3600 : 0;
     }
   );
   return {
@@ -359,7 +359,7 @@ const getStyles = (colors: any) =>
     groupTitle: {
       fontWeight: "bold",
       fontSize: 17,
-      color: colors.primary,
+      color: colors.title,
       marginBottom: 2,
     },
     groupBlock: {

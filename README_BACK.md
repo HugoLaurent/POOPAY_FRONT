@@ -90,7 +90,7 @@
       "start_time": "2025-09-29T08:00:00Z",
       "end_time": "2025-09-29T08:10:00Z",
       "status": "completed",
-      "duration_minutes": 10,
+      "duration_seconds": 600,
       "amount_earned": 2.58
     }
   }
@@ -125,7 +125,7 @@
 | start_time       | string  | Début de la session (ISO 8601) |
 | end_time         | string  | Fin de la session (ISO 8601)   |
 | status           | string  | Statut (pending/completed)     |
-| duration_minutes | integer | Durée en minutes               |
+| duration_seconds | integer | Durée en secondes              |
 | amount_earned    | float   | Montant gagné (€)              |
 
 ## Statuts d'erreur courants
@@ -275,8 +275,9 @@ users (id, username, email, password_hash, hourly_rate, currency,
        contract_hours_per_month, category_id, department_code)
 
 -- Sessions aux toilettes
+-- Sessions aux toilettes
 sessions (id, user_id, start_time, end_time, status,
-          duration_minutes, amount_earned)
+          duration_seconds, amount_earned)
 
 -- Groupes et membres
 groups (id, name, admin_user_id, max_members)
@@ -494,7 +495,7 @@ DB_PASSWORD=your_secure_password
 Le montant gagné est calculé selon la formule :
 
 ```
-amount_earned = (duration_minutes / 60) * hourly_rate
+amount_earned = (duration_seconds / 3600) * hourly_rate
 ```
 
 ### Gestion des fuseaux horaires
