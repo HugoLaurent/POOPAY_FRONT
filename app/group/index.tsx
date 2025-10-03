@@ -3,6 +3,9 @@ import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
+  Modal,
+  TextInput,
+  Alert,
   FlatList,
   StyleSheet,
   TouchableOpacity,
@@ -39,7 +42,37 @@ export default function GroupScreen() {
   const styles = makeStyles(colors, bottomGutter, period);
 
   const handleAddGroup = () => {
-    alert("Fonction à implémenter : ajouter un groupe");
+    setModalVisible(true);
+  };
+
+  // modal / form state
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+
+  const submitCreateGroup = async () => {
+    if (!newGroupName || newGroupName.trim().length === 0) {
+      Alert.alert("Nom requis", "Veuillez entrer un nom de groupe.");
+      return;
+    }
+    if (!token) {
+      Alert.alert("Erreur", "Utilisateur non authentifié.");
+      return;
+    }
+
+    try {
+      await api.createGroup(token, newGroupName);
+      setModalVisible(false);
+      setNewGroupName("");
+      console.log("createGroup success");
+
+      // refresh list
+      fetchGroups();
+      Alert.alert("Groupe créé", "Le groupe a été créé avec succès.");
+    } catch (err) {
+      console.error("createGroup error", err);
+      Alert.alert("Erreur", "Impossible de créer le groupe.");
+    } finally {
+    }
   };
 
   const fetchGroups = useCallback(async () => {
@@ -154,6 +187,91 @@ export default function GroupScreen() {
   return (
     <ThemedView style={styles.safeArea}>
       <View style={styles.container}>
+        {/* Modal for creating a new group */}
+        <Modal
+          visible={modalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.25)",
+              backdropFilter: "blur(80px)",
+              justifyContent: "center",
+              padding: 20,
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: colors.background,
+                borderRadius: 12,
+                padding: 16,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "700",
+                  color: colors.title,
+                  marginBottom: 8,
+                }}
+              >
+                Nouveau groupe
+              </Text>
+              <TextInput
+                placeholder="Nom du groupe"
+                value={newGroupName}
+                onChangeText={setNewGroupName}
+                style={{
+                  borderWidth: 1,
+                  backgroundColor: colors.inputBackground,
+                  borderColor: colors.inputBorder,
+                  paddingHorizontal: 10,
+                  paddingVertical: 8,
+                  borderRadius: 8,
+                  marginBottom: 12,
+                  color: colors.inputText,
+                }}
+                placeholderTextColor={colors.inputPlaceholder}
+              />
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "flex-end",
+                  gap: 8,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={{ paddingHorizontal: 12, paddingVertical: 8 }}
+                >
+                  <Text style={{ color: colors.text }}>Annuler</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={submitCreateGroup}
+                  style={{
+                    backgroundColor: colors.bgButtonPrimary,
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                    borderRadius: 8,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: colors.textButtonPrimary,
+                      fontWeight: "700",
+                    }}
+                  >
+                    Créer
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
         <View style={styles.headerRow}>
           <Text style={styles.title}>Mes Groupes</Text>
           <TouchableOpacity style={styles.addButton} onPress={handleAddGroup}>
