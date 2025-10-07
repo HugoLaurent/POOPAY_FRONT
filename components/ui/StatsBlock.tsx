@@ -26,7 +26,7 @@ export default function StatsBlock({
         <Text style={styles.statsLabel}>{labels[0]}</Text>
       </View>
       <View style={[styles.statsItem, styles.statsItemSpacing]}>
-        <Text style={styles.statsValue}>{stats.amount}€</Text>
+        <Text style={styles.statsValue}>{stats.amount.toFixed(2)}€</Text>
         <Text style={styles.statsLabel}>{labels[1]}</Text>
       </View>
       <View style={styles.statsItem}>

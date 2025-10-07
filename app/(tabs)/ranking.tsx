@@ -88,9 +88,7 @@ export default function ExploreScreen() {
                     {u.username ?? u.name ?? "—"}
                   </ThemedText>
                   <ThemedText style={styles.userScore}>
-                    {typeof u.totalEarned === "number" && u.totalEarned > 0
-                      ? `${u.totalEarned}€`
-                      : `Présent·e ${u.occurrences ?? 0}×`}
+                    {u.totalEarned}€
                   </ThemedText>
                 </ThemedView>
               ))

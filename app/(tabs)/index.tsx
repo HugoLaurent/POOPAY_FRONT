@@ -37,7 +37,7 @@ function getStats(sessionsArr: any[]) {
   );
   return {
     sessions,
-    amount: Math.round(amount),
+    amount: Math.round(amount * 100) / 100,
     time: Math.round(time * 10) / 10,
   };
 }

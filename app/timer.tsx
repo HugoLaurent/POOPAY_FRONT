@@ -114,6 +114,7 @@ export default function TimerScreen() {
           duration_seconds: durationSeconds,
           status: "completed",
         };
+        console.log("Creating session with payload:", payload);
 
         await createSession(token, profile.id, payload as any);
 
