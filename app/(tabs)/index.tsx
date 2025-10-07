@@ -1,6 +1,11 @@
 import GroupRankingBlock from "@/components/ui/GroupRankingBlock";
 import StatsBlock from "@/components/ui/StatsBlock";
+import {
+  NotificationPermissionModal,
+  shouldShowNotificationPermissionModal,
+} from "@/components/ui/NotificationPermissionModal";
 import { useAppData } from "@/contexts/AppContext";
+import { useAuth } from "@/contexts/AuthContext";
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { ThemedView } from "@/components/themed-view";
@@ -38,12 +43,41 @@ function getStats(sessionsArr: any[]) {
 }
 
 export default function HomeScreen() {
-  const { profile, groups, sessions } = useAppData();
+  const { profile, groups, sessions, saveSettings } = useAppData();
+  const { token } = useAuth();
 
   const theme = useColorScheme() ?? "light";
   const colors = Colors[theme];
   const styles = getStyles(colors);
   const now = new Date();
+
+  // État pour la modal de permission des notifications
+  const [showPermissionModal, setShowPermissionModal] = React.useState(false);
+
+  // Callback pour mettre à jour la BDD quand les notifications sont activées
+  const handleNotificationPermissionGranted = React.useCallback(async () => {
+    if (!token || !profile?.id || !saveSettings) return;
+
+    try {
+      console.log("💾 Mise à jour BDD : notifications = true");
+      await saveSettings(token, profile.id, { notifications: true });
+      console.log("✅ BDD mise à jour avec succès");
+    } catch (error) {
+      console.error("❌ Erreur lors de la mise à jour de la BDD:", error);
+    }
+  }, [token, profile?.id, saveSettings]);
+
+  // Vérifier si on doit afficher la modal au premier chargement
+  React.useEffect(() => {
+    const checkPermissionModal = async () => {
+      const shouldShow = await shouldShowNotificationPermissionModal();
+      if (shouldShow) {
+        // Attendre un peu pour que l'utilisateur voie d'abord l'écran
+        setTimeout(() => setShowPermissionModal(true), 2000);
+      }
+    };
+    checkPermissionModal();
+  }, []);
 
   // Semaine (lundi 00:00 -> dimanche 23:59:59.999)
   const day = now.getDay() === 0 ? 6 : now.getDay() - 1;
@@ -204,6 +238,13 @@ export default function HomeScreen() {
           />
         ))}
       </ScrollView>
+
+      {/* Modal de demande de permission pour les notifications */}
+      <NotificationPermissionModal
+        visible={showPermissionModal}
+        onClose={() => setShowPermissionModal(false)}
+        onPermissionGranted={handleNotificationPermissionGranted}
+      />
     </ThemedView>
   );
 }

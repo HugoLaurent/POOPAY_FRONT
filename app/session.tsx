@@ -62,12 +62,13 @@ export default function SessionScreen() {
                     onPress: async () => {
                       try {
                         await deleteSession?.(item.id, token as string);
-                      } catch (e) {
+                      } catch (e: any) {
                         console.error(e);
-                        Alert.alert(
-                          "Erreur",
-                          "Impossible de supprimer la session."
-                        );
+                        const errorMessage =
+                          e?.response?.data?.message ||
+                          e?.message ||
+                          "Impossible de supprimer la session.";
+                        Alert.alert("Erreur", errorMessage);
                       }
                     },
                   },

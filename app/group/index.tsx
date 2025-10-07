@@ -68,9 +68,13 @@ export default function GroupScreen() {
       // refresh list
       fetchGroups();
       Alert.alert("Groupe créé", "Le groupe a été créé avec succès.");
-    } catch (err) {
+    } catch (err: any) {
       console.error("createGroup error", err);
-      Alert.alert("Erreur", "Impossible de créer le groupe.");
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Impossible de créer le groupe.";
+      Alert.alert("Erreur", errorMessage);
     } finally {
     }
   };

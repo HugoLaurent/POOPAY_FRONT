@@ -139,30 +139,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const res = await api.updateSettings(token, userId, newSettings);
         // si réponse contient settings mis à jour, on les utilise
         const updatedRaw = (res && (res as any).data) || res;
-        let normalizedUpdated: any = null;
+        let normalizedUpdated: any = {};
         if (updatedRaw) {
           // si le backend renvoie { preferences: { theme: 'dark', notification_push: true, language: 'fr' } }
           if (updatedRaw.preferences) {
             const p = updatedRaw.preferences || {};
-            normalizedUpdated = {
-              darkMode: p.theme === "dark",
-              notifications:
+            // Ne normaliser que les champs qui étaient dans newSettings pour éviter les effets de bord
+            if (
+              newSettings.darkMode !== undefined ||
+              newSettings.theme !== undefined
+            ) {
+              normalizedUpdated.darkMode = p.theme === "dark";
+            }
+            if (
+              newSettings.notifications !== undefined ||
+              newSettings.notification_push !== undefined
+            ) {
+              normalizedUpdated.notifications =
                 p.notification_push !== undefined
                   ? !!p.notification_push
                   : p.notifications !== undefined
                   ? !!p.notifications
-                  : settings?.notifications ?? true,
-              language: p.language || settings?.language || "fr",
-            };
+                  : undefined;
+            }
+            if (newSettings.language !== undefined) {
+              normalizedUpdated.language = p.language;
+            }
           } else if (updatedRaw.settings) {
             normalizedUpdated = updatedRaw.settings;
           } else {
             // Already in settings shape
             normalizedUpdated = updatedRaw;
           }
+          // Ne mettre à jour que les champs qui ont changé
           setSettings((prev: any) => ({
             ...(prev || {}),
-            ...(normalizedUpdated || {}),
+            ...normalizedUpdated,
           }));
         }
         console.log(

@@ -22,29 +22,23 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSignupMode, setIsSignupMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const { login, signup } = useAuth();
+  const { login } = useAuth();
   const { initializeAppData } = useAppData();
 
   const handleSubmit = async () => {
-    // if (!email || !password) {
-    //   Alert.alert("Erreur", "Veuillez remplir tous les champs");
-    //   return;
-    // }
+    if (!email || !password) {
+      Alert.alert("Erreur", "Veuillez remplir tous les champs");
+      return;
+    }
 
     setIsLoading(true);
 
     try {
-      let success = false;
+      const result = await login(email, password);
 
-      if (isSignupMode) {
-        success = await signup(email, password);
-      } else {
-        success = await login("admin@example.com", "admin1234");
-      }
-
-      if (success) {
+      if (result.success) {
         // Charger les données App avant navigation
         const token = await AsyncStorage.getItem("access_token");
         if (token) {
@@ -52,16 +46,18 @@ export default function LoginScreen() {
         }
         router.push("/(tabs)");
       } else {
+        // Afficher le message d'erreur du backend
         Alert.alert(
-          "Erreur",
-          isSignupMode
-            ? "Impossible de créer le compte"
-            : "Email ou mot de passe incorrect"
+          "Erreur de connexion",
+          result.message || "Email ou mot de passe incorrect"
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("🎯 HandleSubmit: Exception:", error);
-      Alert.alert("Erreur", "Une erreur est survenue");
+      Alert.alert(
+        "Erreur",
+        "Une erreur inattendue est survenue. Vérifie ta connexion."
+      );
     } finally {
       console.log("🎯 HandleSubmit: Fin, arrêt du loading");
       setIsLoading(false);
@@ -90,9 +86,7 @@ export default function LoginScreen() {
             />
             <ThemedText style={styles.title}>POOPAY</ThemedText>
             <ThemedText style={styles.subtitle}>
-              {isSignupMode
-                ? "Crée ton compte pour tracker tes cacas !"
-                : "Connecte-toi pour tracker tes cacas !"}
+              Connecte-toi pour tracker tes cacas !
             </ThemedText>
           </ThemedView>
 
@@ -114,15 +108,25 @@ export default function LoginScreen() {
 
             <ThemedView style={styles.inputContainer}>
               <ThemedText style={styles.label}>Mot de passe</ThemedText>
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Au moins 6 caractères..."
-                placeholderTextColor={colors.inputPlaceholder + "80"}
-                secureTextEntry
-                autoCapitalize="none"
-              />
+              <ThemedView style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Mot de passe"
+                  placeholderTextColor={colors.inputPlaceholder + "80"}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <ThemedText style={styles.eyeText}>
+                    {showPassword ? "Masquer" : "Afficher"}
+                  </ThemedText>
+                </TouchableOpacity>
+              </ThemedView>
             </ThemedView>
 
             <TouchableOpacity
@@ -131,23 +135,17 @@ export default function LoginScreen() {
               disabled={isLoading}
             >
               <ThemedText style={styles.submitButtonText}>
-                {isLoading
-                  ? "⏳ Chargement..."
-                  : isSignupMode
-                  ? "Créer mon compte"
-                  : "Se connecter"}
+                {isLoading ? "⏳ Chargement..." : "Se connecter"}
               </ThemedText>
             </TouchableOpacity>
 
             {/* Switch Mode */}
             <TouchableOpacity
               style={styles.switchButton}
-              onPress={() => setIsSignupMode(!isSignupMode)}
+              onPress={() => router.push("/signup")}
             >
               <ThemedText style={styles.switchButtonText}>
-                {isSignupMode
-                  ? "Déjà un compte ? Se connecter"
-                  : "Pas de compte ? S'inscrire"}
+                Pas de compte ? S&apos;inscrire
               </ThemedText>
             </TouchableOpacity>
           </ThemedView>
@@ -228,6 +226,32 @@ function getStyles(colors: any) {
       borderColor: colors.inputBorder,
       backgroundColor: colors.inputBackground,
       minHeight: 48,
+    },
+    passwordContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      borderWidth: 1,
+      borderRadius: 12,
+      borderColor: colors.inputBorder,
+      backgroundColor: colors.inputBackground,
+      minHeight: 48,
+    },
+    passwordInput: {
+      flex: 1,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: 16,
+      color: colors.inputText,
+    },
+    eyeButton: {
+      padding: 12,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    eyeText: {
+      fontSize: 12,
+      color: colors.textButtonPrimary,
+      fontWeight: "600",
     },
 
     submitButton: {

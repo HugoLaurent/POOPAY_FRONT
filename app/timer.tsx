@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, Pressable, Dimensions } from "react-native";
+import { View, StyleSheet, Pressable, Dimensions, Alert } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { useNavigation, useRouter } from "expo-router";
 import { ThemedView } from "@/components/themed-view";
@@ -122,9 +122,13 @@ export default function TimerScreen() {
         await initializeAppData(token);
 
         router.replace("/(tabs)");
-      } catch (e) {
+      } catch (e: any) {
         console.error("Failed to create session remotely:", e);
-        // Optionally: show a toast or revert optimistic UI
+        const errorMessage =
+          e?.response?.data?.message ||
+          e?.message ||
+          "Échec de la création de la session";
+        Alert.alert("Erreur", errorMessage);
       }
     })();
   }
@@ -135,7 +139,6 @@ export default function TimerScreen() {
     setSecondsElapsed(0);
     setRunning(false);
   }
-
 
   function formatTime(sec: number) {
     const m = Math.floor(sec / 60)

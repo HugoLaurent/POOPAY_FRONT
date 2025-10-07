@@ -16,8 +16,21 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   token: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string) => Promise<boolean>;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; message?: string }>;
+  signup: (
+    email: string,
+    password: string,
+    username?: string,
+    department_code?: string,
+    category_id?: number,
+    monthly_salary?: number,
+    monthly_hours?: number,
+    notifications_enabled?: boolean,
+    theme?: string
+  ) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
   checkAuthStatus: () => Promise<void>;
 }
@@ -60,7 +73,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [isLoading, user]);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; message?: string }> => {
     try {
       console.log("🔐 AuthContext: Début du login");
       const response = await api.login(email, password);
@@ -73,42 +89,82 @@ export function AuthProvider({ children }: AuthProviderProps) {
         await AsyncStorage.setItem("user_data", JSON.stringify(response.user));
         setUser(response.user);
         setToken(response.token);
-        return true;
+        return { success: true };
       }
 
-      console.error(
-        "❌ AuthContext: Erreur de connexion: Données invalides",
-        response
-      );
-      return false;
-    } catch (error) {
+      // Erreur du backend
+      const errorMessage = response?.message || "Identifiants invalides";
+      console.error("❌ AuthContext: Erreur de connexion:", errorMessage);
+      return { success: false, message: errorMessage };
+    } catch (error: any) {
       console.error("❌ AuthContext: Exception:", error);
-      return false;
+      return {
+        success: false,
+        message: error?.message || "Impossible de contacter le serveur",
+      };
     }
   };
 
-  const signup = async (email: string, password: string): Promise<boolean> => {
+  const signup = async (
+    email: string,
+    password: string,
+    username?: string,
+    department_code?: string,
+    category_id?: number,
+    monthly_salary?: number,
+    monthly_hours?: number,
+    notifications_enabled?: boolean,
+    theme?: string
+  ): Promise<{ success: boolean; message?: string }> => {
     try {
-      const response = await api.signup(email, password);
+      console.log("🔐 AuthContext: Début de l'inscription");
+      const response = await api.signup(
+        email,
+        password,
+        username,
+        department_code,
+        category_id,
+        monthly_salary,
+        monthly_hours,
+        notifications_enabled,
+        theme
+      );
 
+      console.log("🔐 AuthContext: Réponse reçue:", response);
+
+      // Vérifier différents formats de réponse
       if (response.status === "success" && response.data?.access_token) {
-        // Stocker le token
+        console.log("✅ AuthContext: Inscription réussie (format v1)");
         await AsyncStorage.setItem("access_token", response.data.access_token);
-
-        // Stocker les données utilisateur
         await AsyncStorage.setItem(
           "user_data",
           JSON.stringify(response.data.user)
         );
         setUser(response.data.user);
-        return true;
+        setToken(response.data.access_token);
+        return { success: true };
       }
 
-      console.error("Erreur d'inscription:", response.message);
-      return false;
-    } catch (error) {
-      console.error("Erreur d'inscription:", error);
-      return false;
+      // Format alternatif avec token direct
+      if (response.token && response.user) {
+        console.log("✅ AuthContext: Inscription réussie (format v2)");
+        await AsyncStorage.setItem("access_token", response.token);
+        await AsyncStorage.setItem("user_data", JSON.stringify(response.user));
+        setUser(response.user);
+        setToken(response.token);
+        return { success: true };
+      }
+
+      // Erreur du backend
+      const errorMessage = response.message || "Erreur lors de l'inscription";
+      console.error("❌ AuthContext: Erreur d'inscription:", errorMessage);
+      return { success: false, message: errorMessage };
+    } catch (error: any) {
+      console.error("❌ AuthContext: Exception lors de l'inscription:", error);
+      return {
+        success: false,
+        message: error?.message || "Impossible de contacter le serveur",
+      };
     }
   };
 

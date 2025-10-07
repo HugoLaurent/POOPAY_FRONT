@@ -7,8 +7,10 @@ import {
   Switch,
   Alert,
   ScrollView,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppData } from "@/contexts/AppContext";
 import { Colors } from "@/constants/theme";
@@ -16,6 +18,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { useRouter } from "expo-router";
+import { useNotifications } from "@/hooks/useNotifications";
 import * as api from "../../apiService";
 
 export default function SettingsScreen() {
@@ -25,6 +28,14 @@ export default function SettingsScreen() {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
   const styles = getStyles(colors);
+
+  // Hook pour les notifications natives
+  const {
+    permissionStatus,
+    requestPermission,
+    schedulePushNotification,
+    cancelAllScheduledNotifications,
+  } = useNotifications();
 
   const [username, setUsername] = useState<string>(profile?.username || "");
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(
@@ -42,10 +53,23 @@ export default function SettingsScreen() {
   }, [profile]);
 
   useEffect(() => {
-    setNotificationsEnabled(settings?.notifications ?? true);
+    // Synchroniser avec les permissions natives ET les settings de la BDD
+    // Si la permission native est refusée, forcer le toggle à false
+    const effectiveNotifications = permissionStatus.granted
+      ? settings?.notifications ?? true
+      : false;
+
+    setNotificationsEnabled(effectiveNotifications);
+
+    // Synchroniser AsyncStorage avec l'état effectif
+    AsyncStorage.setItem(
+      "notifications_enabled",
+      effectiveNotifications ? "true" : "false"
+    );
+
     setDarkMode(settings?.darkMode ?? false);
     setLanguage(settings?.language || "fr");
-  }, [settings]);
+  }, [settings, permissionStatus.granted]);
 
   const canSave = useMemo(() => {
     return !!token && !!user;
@@ -66,9 +90,13 @@ export default function SettingsScreen() {
     try {
       await saveSettings?.(token as string, user!.id, newSettings);
       Alert.alert("Sauvegardé", "Vos préférences ont été enregistrées.");
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      Alert.alert("Erreur", "Impossible de sauvegarder les préférences.");
+      const errorMessage =
+        e?.response?.data?.message ||
+        e?.message ||
+        "Impossible de sauvegarder les préférences.";
+      Alert.alert("Erreur", errorMessage);
     } finally {
       setSaving(false);
     }
@@ -77,9 +105,13 @@ export default function SettingsScreen() {
   const handleLogout = async () => {
     try {
       await logout();
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      Alert.alert("Erreur", "Impossible de se déconnecter.");
+      const errorMessage =
+        e?.response?.data?.message ||
+        e?.message ||
+        "Impossible de se déconnecter.";
+      Alert.alert("Erreur", errorMessage);
     }
   };
 
@@ -95,9 +127,13 @@ export default function SettingsScreen() {
     try {
       const res = await api.getAllData(token as string, user!.id);
       Alert.alert("Export des données", JSON.stringify(res, null, 2));
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      Alert.alert("Erreur", "Impossible d'exporter les données.");
+      const errorMessage =
+        e?.response?.data?.message ||
+        e?.message ||
+        "Impossible d'exporter les données.";
+      Alert.alert("Erreur", errorMessage);
     }
   };
 
@@ -106,9 +142,50 @@ export default function SettingsScreen() {
     try {
       // ...clear caches, AsyncStorage, etc.
       Alert.alert("Cache", "Cache et données temporaires effacés.");
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      Alert.alert("Erreur", "Impossible d'effacer le cache.");
+      const errorMessage = e?.message || "Impossible d'effacer le cache.";
+      Alert.alert("Erreur", errorMessage);
+    }
+  };
+
+  const handleTestNotification = async () => {
+    try {
+      // D'abord vérifier/demander la permission
+      if (!permissionStatus.granted) {
+        const granted = await requestPermission();
+        if (!granted) {
+          Alert.alert(
+            "Permission requise",
+            "Les notifications sont nécessaires pour ce test. Veuillez activer les notifications dans les paramètres.",
+            [
+              { text: "Annuler", style: "cancel" },
+              {
+                text: "Ouvrir les paramètres",
+                onPress: () => Linking.openSettings(),
+              },
+            ]
+          );
+          return;
+        }
+      }
+
+      // Envoyer la notification de test
+      await schedulePushNotification(
+        "🚽 Test POOPAY",
+        "Notification de test réussie ! Les notifications locales fonctionnent 🎉",
+        3
+      );
+
+      Alert.alert(
+        "✅ Notification programmée",
+        "Vous allez recevoir une notification dans 3 secondes !"
+      );
+    } catch (e: any) {
+      console.error(e);
+      const errorMessage =
+        e?.message || "Impossible d'envoyer la notification de test.";
+      Alert.alert("Erreur", errorMessage);
     }
   };
 
@@ -124,15 +201,70 @@ export default function SettingsScreen() {
         typeof payload
       );
       await saveSettings?.(token as string, user!.id, payload);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Erreur toggle darkMode:", e);
-      Alert.alert("Erreur", "Impossible d'appliquer le thème.");
+      const errorMessage =
+        e?.response?.data?.message ||
+        e?.message ||
+        "Impossible d'appliquer le thème.";
+      Alert.alert("Erreur", errorMessage);
       // revert local state on error
       setDarkMode((prev) => !prev);
     }
   };
 
   const handleToggleNotifications = async (value: boolean) => {
+    // Sauvegarder immédiatement dans AsyncStorage pour bloquer les notifications
+    try {
+      await AsyncStorage.setItem(
+        "notifications_enabled",
+        value ? "true" : "false"
+      );
+      console.log(`💾 AsyncStorage: notifications_enabled = ${value}`);
+    } catch (e) {
+      console.error("Erreur sauvegarde AsyncStorage:", e);
+    }
+
+    // Si l'utilisateur désactive les notifs, annuler toutes les notifications programmées
+    if (!value && cancelAllScheduledNotifications) {
+      await cancelAllScheduledNotifications();
+    }
+
+    // Si l'utilisateur active les notifs et qu'on n'a pas la permission
+    if (value && !permissionStatus.granted) {
+      // Créer le callback pour mettre à jour la BDD
+      const onPermissionGranted = async () => {
+        if (!canSave) return;
+        try {
+          console.log("💾 [Settings] Mise à jour BDD : notifications = true");
+          await saveSettings?.(token as string, user!.id, {
+            notifications: true,
+          });
+          console.log("✅ [Settings] BDD mise à jour avec succès");
+        } catch (e) {
+          console.error("❌ [Settings] Erreur mise à jour BDD:", e);
+        }
+      };
+
+      const granted = await requestPermission(onPermissionGranted);
+      if (!granted) {
+        // Permission refusée, remettre AsyncStorage à false
+        await AsyncStorage.setItem("notifications_enabled", "false");
+        Alert.alert(
+          "Permission refusée",
+          "Les notifications sont désactivées. Vous pouvez les activer dans les paramètres de votre téléphone.",
+          [
+            { text: "Annuler", style: "cancel" },
+            {
+              text: "Ouvrir les paramètres",
+              onPress: () => Linking.openSettings(),
+            },
+          ]
+        );
+        return; // Ne pas mettre à jour si pas de permission
+      }
+    }
+
     setNotificationsEnabled(value);
     if (!canSave) return;
     try {
@@ -143,9 +275,13 @@ export default function SettingsScreen() {
         typeof payload
       );
       await saveSettings?.(token as string, user!.id, payload);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Erreur toggle notifications:", e);
-      Alert.alert("Erreur", "Impossible de modifier les notifications.");
+      const errorMessage =
+        e?.response?.data?.message ||
+        e?.message ||
+        "Impossible de modifier les notifications.";
+      Alert.alert("Erreur", errorMessage);
       setNotificationsEnabled((prev) => !prev);
     }
   };
@@ -208,57 +344,6 @@ export default function SettingsScreen() {
             />
           </View>
 
-          <ThemedText style={styles.fieldLabel}>Langue</ThemedText>
-          <View
-            style={[
-              styles.twoButtonRowFooter,
-              styles.twoButtonRowNarrow,
-              styles.twoButtonRowFullWidth,
-            ]}
-          >
-            <Pressable
-              onPress={() => setLanguage("fr")}
-              style={({ pressed }) => [
-                styles.langButton,
-                language === "fr"
-                  ? styles.langBtnActive
-                  : styles.langBtnInactive,
-                pressed && styles.buttonPressed,
-              ]}
-            >
-              <ThemedText
-                style={
-                  language === "fr"
-                    ? [styles.fullWidthButtonText, styles.langTextActive]
-                    : [styles.fullWidthButtonText, styles.langTextInactive]
-                }
-              >
-                Français
-              </ThemedText>
-            </Pressable>
-
-            <Pressable
-              onPress={() => setLanguage("en")}
-              style={({ pressed }) => [
-                styles.langButton,
-                language === "en"
-                  ? styles.langBtnActive
-                  : styles.langBtnInactive,
-                pressed && styles.buttonPressed,
-              ]}
-            >
-              <ThemedText
-                style={
-                  language === "en"
-                    ? [styles.fullWidthButtonText, styles.langTextActive]
-                    : [styles.fullWidthButtonText, styles.langTextInactive]
-                }
-              >
-                English
-              </ThemedText>
-            </Pressable>
-          </View>
-
           <View style={styles.moreSection}>
             <ThemedText style={styles.moreTitle}>
               Plus d&apos;options
@@ -266,6 +351,15 @@ export default function SettingsScreen() {
 
             <Pressable style={styles.moreItem} onPress={goToSessions}>
               <ThemedText style={styles.moreItemText}>Mes sessions</ThemedText>
+            </Pressable>
+
+            <Pressable
+              style={[styles.moreItem, styles.testNotifButton]}
+              onPress={handleTestNotification}
+            >
+              <ThemedText style={[styles.moreItemText, styles.testNotifText]}>
+                🔔 Tester une notification
+              </ThemedText>
             </Pressable>
 
             <Pressable style={styles.moreItem} onPress={handleExportData}>
@@ -282,15 +376,19 @@ export default function SettingsScreen() {
 
             <Pressable
               style={styles.moreItem}
-              onPress={() =>
-                Alert.alert(
-                  "Confidentialité",
-                  "Gérer les permissions et la confidentialité (placeholder)"
-                )
-              }
+              onPress={() => router.push("/privacy")}
             >
               <ThemedText style={styles.moreItemText}>
                 Confidentialité et permissions
+              </ThemedText>
+            </Pressable>
+
+            <Pressable
+              style={styles.moreItem}
+              onPress={() => router.push("/legal")}
+            >
+              <ThemedText style={styles.moreItemText}>
+                Mentions légales et santé
               </ThemedText>
             </Pressable>
 
@@ -544,5 +642,14 @@ const getStyles = (colors: any) =>
       borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
+    },
+    testNotifButton: {
+      backgroundColor: colors.primary + "15", // 15 = opacity en hexa
+      borderLeftWidth: 3,
+      borderLeftColor: colors.primary,
+    },
+    testNotifText: {
+      color: colors.primary,
+      fontWeight: "600",
     },
   });
