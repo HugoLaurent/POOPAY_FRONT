@@ -108,7 +108,6 @@ const getStyles = (colors: any) =>
     scrollContent: { paddingBottom: 30 },
     header: {
       paddingHorizontal: 20,
-      paddingTop: 10,
       paddingBottom: 12,
       alignItems: "center",
     },
