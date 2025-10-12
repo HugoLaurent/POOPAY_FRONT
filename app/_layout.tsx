@@ -1,3 +1,5 @@
+// import "../polyfills"; // ⬅️ Plus nécessaire avec Socket.IO
+
 import {
   DarkTheme,
   DefaultTheme,

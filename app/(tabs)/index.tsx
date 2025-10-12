@@ -4,6 +4,9 @@ import {
   NotificationPermissionModal,
   shouldShowNotificationPermissionModal,
 } from "@/components/ui/NotificationPermissionModal";
+import { NotificationBadge } from "@/components/ui/NotificationBadge";
+import { NotificationListModal } from "@/components/ui/NotificationListModal";
+import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
 import { useAppData } from "@/contexts/AppContext";
 import { useAuth } from "@/contexts/AuthContext";
 import React from "react";
@@ -54,6 +57,13 @@ export default function HomeScreen() {
   // État pour la modal de permission des notifications
   const [showPermissionModal, setShowPermissionModal] = React.useState(false);
 
+  // État pour la modal de liste des notifications
+  const [showNotificationList, setShowNotificationList] = React.useState(false);
+
+  // Utiliser le hook pour les notifications en temps réel
+  const { notifications, acceptGroupInvitation, rejectGroupInvitation } =
+    useRealtimeNotifications();
+
   // Callback pour mettre à jour la BDD quand les notifications sont activées
   const handleNotificationPermissionGranted = React.useCallback(async () => {
     if (!token || !profile?.id || !saveSettings) return;
@@ -66,6 +76,74 @@ export default function HomeScreen() {
       console.error("❌ Erreur lors de la mise à jour de la BDD:", error);
     }
   }, [token, profile?.id, saveSettings]);
+
+  // Gérer l'acceptation d'une notification
+  const handleAcceptNotification = React.useCallback(
+    async (notificationId: string) => {
+      console.log(
+        "🔍 handleAcceptNotification appelée avec notificationId:",
+        notificationId
+      );
+      console.log("📋 Liste des notifications disponibles:", notifications);
+
+      // Trouver la notification pour obtenir le related_id
+      const notification = notifications.find((n) => n.id === notificationId);
+      console.log("🎯 Notification trouvée:", notification);
+
+      if (!notification) {
+        console.error("❌ Notification non trouvée dans la liste");
+        return;
+      }
+
+      if (notification.type !== "group_invite") {
+        console.error("❌ Type de notification incorrect:", notification.type);
+        return;
+      }
+
+      if (!notification.related_id) {
+        console.error("❌ Pas de related_id dans la notification");
+        return;
+      }
+
+      console.log(
+        "✅ Toutes les validations passées, appel de acceptGroupInvitation"
+      );
+      const success = await acceptGroupInvitation(
+        notificationId,
+        notification.related_id
+      );
+      console.log("✅ Réponse du serveur:", success);
+
+      if (success) {
+        console.log("✅ Invitation acceptée avec succès");
+      }
+    },
+    [notifications, acceptGroupInvitation]
+  );
+
+  // Gérer le refus d'une notification
+  const handleRejectNotification = React.useCallback(
+    async (notificationId: string) => {
+      console.log("Notification refusée:", notificationId);
+
+      // Trouver la notification pour obtenir le related_id
+      const notification = notifications.find((n) => n.id === notificationId);
+      if (
+        notification &&
+        notification.type === "group_invite" &&
+        notification.related_id
+      ) {
+        const success = await rejectGroupInvitation(
+          notificationId,
+          notification.related_id
+        );
+        if (success) {
+          console.log("✅ Invitation refusée avec succès");
+        }
+      }
+    },
+    [notifications, rejectGroupInvitation]
+  );
 
   // Vérifier si on doit afficher la modal au premier chargement
   React.useEffect(() => {
@@ -164,6 +242,12 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.headerSection}>
           <ThemedText style={styles.appTitle}>{"POOPAY"}</ThemedText>
+          <View style={styles.notificationBadgeContainer}>
+            <NotificationBadge
+              count={notifications.length}
+              onPress={() => setShowNotificationList(true)}
+            />
+          </View>
         </View>
         <ThemedText style={styles.subtitle}>
           Combien tu gagnes aux toilettes auqsd travail ?
@@ -245,6 +329,15 @@ export default function HomeScreen() {
         onClose={() => setShowPermissionModal(false)}
         onPermissionGranted={handleNotificationPermissionGranted}
       />
+
+      {/* Modal de liste des notifications */}
+      <NotificationListModal
+        visible={showNotificationList}
+        onClose={() => setShowNotificationList(false)}
+        notifications={notifications}
+        onAccept={handleAcceptNotification}
+        onReject={handleRejectNotification}
+      />
     </ThemedView>
   );
 }
@@ -268,6 +361,12 @@ const getStyles = (colors: any) =>
     // Header
     headerSection: {
       alignItems: "center",
+      position: "relative",
+    },
+    notificationBadgeContainer: {
+      position: "absolute",
+      right: 0,
+      top: 0,
     },
     welcomeText: {
       fontSize: 18,
